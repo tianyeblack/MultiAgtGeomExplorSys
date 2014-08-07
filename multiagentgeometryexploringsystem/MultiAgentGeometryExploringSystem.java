@@ -99,7 +99,6 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		ui.setAutoDraw(false);
 
 
-
 		ui.addSlider("ISO",0,1,ISO,20,20,300,14);
 		//ui.addButton ("Isosruface",20,20,300,14));
 	}
