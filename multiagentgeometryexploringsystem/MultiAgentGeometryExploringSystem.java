@@ -60,9 +60,9 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	int DIM = 3000;
 
 	int DIMX, DIMY, DIMZ;
-	int ratio = 5;
-	static final float isoBrushSize = 5f;
-	static final float isoBrushDensity = 1f;
+	int ratio = 3;
+	float isoBrushSize = ratio;
+	float isoBrushDensity = 1f;
 
 
 	Vec3D SCALE = new Vec3D(DIM, DIM, DIM);
@@ -90,7 +90,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		surfaceA = new ArrayIsoSurface(volumeA);
 		surfaceB = new ArrayIsoSurface(volumeB);
 		surfaceC = new ArrayIsoSurface(volumeC);
-		brushA = new RoundBrush(volumeA, 5f);
+		brushA = new RoundBrush(volumeA, isoBrushSize);
 		brushB = new RoundBrush(volumeB, 2f);
 		brushC = new RoundBrush(volumeC, 4f);
 
@@ -202,9 +202,9 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		agt = new AgentsTrail(lines.length);
 		Vec3D trans = new Vec3D(x_min, y_min, z_min);
 		System.out.printf("%f, %f, %f\n", x_max - x_min, y_max - y_min, z_max - z_min);
-		bX = (int) (Math.ceil((x_max - x_min) / 500) * 500);
-		bY = (int) (Math.ceil((y_max - y_min) / 500) * 500);
-		bZ = (int) (Math.ceil((z_max - z_min) / 500) * 500);
+		bX = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
+		bY = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
+		bZ = (int) (Math.ceil((z_max - z_min) / ratio) * ratio);
 		System.out.printf("%d, %d, %d\n", bX, bY, bZ);
 		DIMX = bX;
 		DIMY = bY;
@@ -280,7 +280,6 @@ void drawLines(){
 				
 				for (Vec3D v : a.getTrail()) {
 					point(v.x, v.y, v.z);
-					brush.setSize(isoBrushSize);
 					brush.drawAtAbsolutePos(v, isoBrushDensity);
 				}
 			}

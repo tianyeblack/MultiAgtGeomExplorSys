@@ -7,7 +7,7 @@ import toxi.geom.Vec3D;
 public class Agent {
 	static final float maxvel = 2;
 	static final float maxForce = 10;
-	static final int every = 1;
+	static final int every = 5;
 	static final int trailNum = 200;
 
 	static final float alignment = 0.03f;
