@@ -80,10 +80,10 @@ public class Agent {
 		//	if (agentType.equals("a") || agentType.equals("b")) {
 				flock();
 		//	}
-			attractFaces(faceAttraction);
-			if (agentType.equals("c")) {
-				moveOnSrf(onSrfMotion);
-				followTrails(trailFollow);
+			//attractFaces(faceAttraction);
+			if (agentType.equals("b")) {
+				//moveOnSrf(onSrfMotion);
+				//followTrails(trailFollow);
 			}
 			dropTrail(every, trailNum, iteration);
 		}
@@ -95,11 +95,6 @@ public class Agent {
 		alignment(alignment);
 	}
 
-	private void agentConnection() {
-		
-
-	     
-		}
 	
 	public void update() {
 		if (runToggle == true) {
