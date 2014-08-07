@@ -1,12 +1,13 @@
 package agentTrailGeomForm;
 
 import java.util.ArrayList;
+
 import toxi.geom.Vec3D;
 
 public class Agent {
 	static final float maxvel = 2;
 	static final float maxForce = 10;
-	static final int every = 5;
+	static final int every = 1;
 	static final int trailNum = 200;
 
 	static final float alignment = 0.03f;
@@ -30,7 +31,7 @@ public class Agent {
 	Vec3D loc;								// current location
 	Vec3D vel;								// current velocity
 	Vec3D acc;								// current acceleration
-	Vec3D start;							// starting point
+	public Vec3D start;						// starting point
 	ArrayList<Vec3D> trail;					// trail of this agent
 	boolean runToggle;						// moving or stopping
 	float score;							// property 1
@@ -76,9 +77,9 @@ public class Agent {
 
 	public void run(int iteration) {
 		if (runToggle == true) {
-			if (agentType.equals("a") || agentType.equals("b")) {
+		//	if (agentType.equals("a") || agentType.equals("b")) {
 				flock();
-			}
+		//	}
 			attractFaces(faceAttraction);
 			if (agentType.equals("c")) {
 				moveOnSrf(onSrfMotion);
@@ -96,7 +97,9 @@ public class Agent {
 
 	private void agentConnection() {
 		
-	}
+
+	     
+		}
 	
 	public void update() {
 		if (runToggle == true) {
