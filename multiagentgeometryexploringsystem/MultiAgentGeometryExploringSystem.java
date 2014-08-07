@@ -3,6 +3,7 @@ package multiagentgeometryexploringsystem;
 import java.util.ArrayList;
 
 import agentTrailGeomForm.Agent;
+import agentTrailGeomForm.AgentLine;
 import agentTrailGeomForm.AgentsTrail;
 import controlP5.ControlP5;
 import peasy.PeasyCam;
@@ -11,6 +12,7 @@ import toxi.geom.Vec3D;
 import toxi.geom.mesh.TriangleMesh;
 import toxi.processing.ToxiclibsSupport;
 import toxi.volume.ArrayIsoSurface;
+import toxi.volume.BoxBrush;
 import toxi.volume.IsoSurface;
 import toxi.volume.RoundBrush;
 import toxi.volume.VolumetricBrush;
@@ -19,7 +21,7 @@ import toxi.volume.VolumetricSpaceArray;
 
 @SuppressWarnings("serial")
 public class MultiAgentGeometryExploringSystem extends PApplet {
-	
+
 	PeasyCam cam;
 	VolumetricBrush brushA;
 	VolumetricBrush brushB;
@@ -44,6 +46,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	boolean record = false;
 	boolean strok = false;
 	boolean compute = false;
+	boolean trail = false;
 
 	//Box size
 	int bX;
@@ -60,7 +63,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	int DIM = 3000;
 
 	int DIMX, DIMY, DIMZ;
-	int ratio = 3;
+	int ratio = 4;
 	float isoBrushSize = ratio;
 	float isoBrushDensity = 1f;
 
@@ -75,7 +78,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		size(1200, 800, OPENGL);
 		smooth();
 		cam = new PeasyCam(this, 600);
-//		cam.lookAt(800, -200, 800);
+		//		cam.lookAt(800, -200, 800);
 
 		getGeometry(starts, scores, "src/data/catenary_mesh_relaxed_03a.txt");
 		agt.assignAgentsType(1);
@@ -90,9 +93,9 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		surfaceA = new ArrayIsoSurface(volumeA);
 		surfaceB = new ArrayIsoSurface(volumeB);
 		surfaceC = new ArrayIsoSurface(volumeC);
-		brushA = new RoundBrush(volumeA, isoBrushSize);
-		brushB = new RoundBrush(volumeB, 2f);
-		brushC = new RoundBrush(volumeC, 4f);
+		brushA = new BoxBrush(volumeA, isoBrushSize);
+		brushB = new BoxBrush(volumeB, 2f);
+		brushC = new BoxBrush(volumeC, 4f);
 
 		gfx = new ToxiclibsSupport(this);
 		ui = new ControlP5(this);
@@ -111,7 +114,12 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		//displayStarts();
 
 		agt.runAgents(frameCount);
-		displayLocs();
+		if (trail == true) {
+			displayTrails();
+			displayConnections();
+		} else {
+			displayLocs();
+		}
 
 		// A bounding box for a better view
 		stroke(0, 0, 192);
@@ -139,11 +147,11 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			gfx.mesh(meshA, true);
 
 			noStroke();
-			fill(255, 0, 0);	
+			fill(0, 255, 0);	
 			gfx.mesh(meshB, true);
 
 			noStroke();
-			fill(0, 255, 0);	
+			fill(255, 0, 0);	
 			gfx.mesh(meshC, true);
 		}
 
@@ -160,8 +168,8 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		if (ui.window(this).isMouseOver()) cam.setActive(false);
 		else cam.setActive(true);
 		gui();
-		
-		
+
+
 	}
 
 	void gui() {
@@ -228,35 +236,67 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	}
 
 	void displayLocs() {
+		strokeWeight(4);// no stroke for the shape.
 		for (Agent a : agt.getAgents()) {
 			String agtType = a.getType();
 			Vec3D loc = a.getLoc();
 			if (agtType.equals("a")) {
-				stroke(0, 250, 0);// fill color, a dark green.
-				strokeWeight(4);// no stroke for the shape.
+				stroke(0, 0, 250);// fill color, a dark blue.
 				point(loc.x, loc.y, loc.z);// an ellipse with center in the loc vector's coordinates, and 4 units wide and 4 units tall.
 			}
 			if (agtType.equals("b")) {
-				stroke(0,0,250);// fill color, a dark blue.
-				strokeWeight(4);// no stroke for the shape.
+				stroke(0, 250, 0);// fill color, a dark green.
 				point(loc.x, loc.y, loc.z);// an ellipse with center in the loc vector's coordinates, and 4 units wide and 4 units tall.
 			}
 			if (agtType.equals("c")) {
-				stroke(255, 0, 0);// fill color, a r.
-				strokeWeight(4);// no stroke for the shape.
+				stroke(250, 0, 0);// fill color, a dark red.
 				point(loc.x, loc.y, loc.z);// an ellipse with center in the loc vector's coordinates, and 4 units wide and 4 units tall.
 			}
 		}
 	}
 
-void drawLines(){
+	void displayTrails() {
+		strokeWeight(2);// no stroke for the shape.
+		for (Agent a : agt.getAgents()) {
+			String agtType = a.getType();
+			ArrayList<Vec3D> trail = a.getTrail();
+			if (agtType.equals("a")) {
+				stroke(0, 0, 200);// fill color, a dark blue.
+				for (Vec3D v : trail) {
+					point(v.x, v.y, v.z);// an ellipse with center in the loc vector's coordinates, and 4 units wide and 4 units tall.
+				}
+			}
+			if (agtType.equals("b")) {
+				stroke(0, 200, 0);// fill color, a dark green.
+				for (Vec3D v : trail) {
+					point(v.x, v.y, v.z);// an ellipse with center in the loc vector's coordinates, and 4 units wide and 4 units tall.
+				}
+			}
+			if (agtType.equals("c")) {
+				stroke(200, 0, 0);// fill color, a dark red.
+				for (Vec3D v : trail) {
+					point(v.x, v.y, v.z);// an ellipse with center in the loc vector's coordinates, and 4 units wide and 4 units tall.
+				}
+			}
+		}
+	}
+
+	void displayConnections() {
+		ArrayList<AgentLine> connections = agt.getConnections();
+		for (AgentLine l : connections) {
+			stroke(64);
+			strokeWeight(1.0f);
+			Vec3D pta = l.getPta();
+			Vec3D ptb = l.getPtb();
+			line(pta.x, pta.y, pta.z, ptb.x, ptb.y, ptb.z);
+		}
+	}
 	
-	for (Agent a : agt.getAgents()) {
-	
+	void drawLines(){
+		for (Agent a : agt.getAgents()) {
 			
 		}
-		
-}
+	}
 
 
 	void drawTrails() {
@@ -276,8 +316,8 @@ void drawLines(){
 					stroke(0, 0, 255);
 					strokeWeight(1.0f);
 				} else brush = brushA;
-				
-				
+
+
 				for (Vec3D v : a.getTrail()) {
 					point(v.x, v.y, v.z);
 					brush.drawAtAbsolutePos(v, isoBrushDensity);
@@ -288,18 +328,18 @@ void drawLines(){
 
 	public void keyPressed() {
 
-		  ////Video
-		  if (key == 'r') {
-		    videoRecord = ! videoRecord;  // start/stop the movie (one press start, second press stop)
-		    if (videoRecord) {
-		      println("MOVIE STARTED!");
-		      movieCounter = 0;
-		    }
-		    if (!videoRecord) { 
-		      println("MOVIE STOPPED!");
-		    }
-		  }
-		
+		////Video
+		if (key == 'r') {
+			videoRecord = ! videoRecord;  // start/stop the movie (one press start, second press stop)
+			if (videoRecord) {
+				println("MOVIE STARTED!");
+				movieCounter = 0;
+			}
+			if (!videoRecord) { 
+				println("MOVIE STOPPED!");
+			}
+		}
+
 
 		if (key=='s'){
 			meshA.saveAsSTL(sketchPath(meshA.name + frameCount+ counter + ".stl"));
@@ -328,20 +368,21 @@ void drawLines(){
 		if (key == 'c' ||key == 'C') {
 			compute = !compute;
 		}
+		if (key == 't') trail = !trail;
 	}
 
 
-	
 
-void recording(){
-  if(videoRecord==true){
-    
-    String saveName = "Agents" + "__" + nf(movieCounter, 4) + ".png";
-    saveFrame(saveName);
-    println(saveName);
-    movieCounter+=2;
-  }
-}
+
+	void recording(){
+		if(videoRecord==true){
+
+			String saveName = "Agents" + "__" + nf(movieCounter, 4) + ".png";
+			saveFrame(saveName);
+			println(saveName);
+			movieCounter+=2;
+		}
+	}
 
 
 	public static void main(String _args[]) {
