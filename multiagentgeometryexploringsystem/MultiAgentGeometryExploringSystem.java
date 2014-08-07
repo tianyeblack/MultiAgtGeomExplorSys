@@ -72,6 +72,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 
 	AgentsTrail agt;
 	Vec3D[] starts;
+	Vec3D[] outlines;
 	float[] scores;
 
 	public void setup() {
@@ -80,7 +81,10 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		cam = new PeasyCam(this, 600);
 		//		cam.lookAt(800, -200, 800);
 
-		getGeometry(starts, scores, "src/data/catenary_mesh_relaxed_03a.txt");
+		getGeometry("src/data/catenary_mesh_relaxed_03a.txt");
+	//	getBoundary("src/data/catenary_mesh_relaxed_04_outlines.txt");
+		
+		
 		agt.assignAgentsType(1);
 		agt.assignAgentsType(2);
 		SCALE = new Vec3D(bX, bY, bZ);
@@ -93,14 +97,14 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		surfaceA = new ArrayIsoSurface(volumeA);
 		surfaceB = new ArrayIsoSurface(volumeB);
 		surfaceC = new ArrayIsoSurface(volumeC);
-		brushA = new BoxBrush(volumeA, isoBrushSize);
-		brushB = new BoxBrush(volumeB, 2f);
-		brushC = new BoxBrush(volumeC, 4f);
+		brushA = new RoundBrush(volumeA, isoBrushSize);
+		brushB = new RoundBrush(volumeB, 6f);
+		brushC = new RoundBrush(volumeC, 4f);
 
 		gfx = new ToxiclibsSupport(this);
 		ui = new ControlP5(this);
 		ui.setAutoDraw(false);
-
+			
 
 		ui.addSlider("ISO",0,1,ISO,20,20,300,14);
 		//ui.addButton ("Isosruface",20,20,300,14));
@@ -111,8 +115,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		if (record) beginRaw(PDF, "msa_catenary_Srf_trails"+ frameCount+".pdf") ;
 		background(255);
 		lights();
-		//displayStarts();
-
+		
 		agt.runAgents(frameCount);
 		if (trail == true) {
 			displayTrails();
@@ -126,6 +129,9 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		strokeWeight(.5f);
 		noFill();
 		box(bX, bY, bZ);
+		displayStarts();
+		displayLocs();
+		//displayOutline();
 
 		if (frameCount % 5 == 0 && compute) {
 			drawTrails();
@@ -180,7 +186,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		hint(ENABLE_DEPTH_TEST);
 	}
 
-	void getGeometry(Vec3D[] starts, float[] scores, String filename) {
+	void getGeometry(String filename) {
 		float x_min, y_min, z_min, x_max, y_max, z_max;
 		x_min = Float.MAX_VALUE;
 		y_min = Float.MAX_VALUE;
@@ -222,6 +228,64 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		agt.createAgents(lines.length, scores, starts);
 	}
 
+	
+	
+	void getBoundary(String filename){
+		float x_min, y_min, z_min, x_max, y_max, z_max;
+		x_min = Float.MAX_VALUE;
+		y_min = Float.MAX_VALUE;
+		z_min = Float.MAX_VALUE;
+		x_max = Float.MIN_VALUE;
+		y_max = Float.MIN_VALUE;
+		z_max = Float.MIN_VALUE;
+		String[] lines=loadStrings (filename);
+		outlines = new Vec3D[lines.length];
+		for (int i = 0; i < lines.length; i++) {
+			String[] coordinates = split(lines[i].substring(1, lines[i].length() - 1), ", ");
+			float x_cur = Float.parseFloat(coordinates[0]);
+			float y_cur = Float.parseFloat(coordinates[1]);
+			float z_cur = Float.parseFloat(coordinates[2]);
+			if (x_cur < x_min) x_min = x_cur;
+			else if (x_cur > x_max) x_max = x_cur;
+			if (y_cur < y_min) y_min = y_cur;
+			else if (y_cur > y_max) y_max = y_cur;
+			if (z_cur < z_min) z_min = z_cur;
+			else if (z_cur > z_max) z_max = z_cur;
+			outlines[i]= new Vec3D (x_cur, y_cur, z_cur);
+			println (outlines[i]); 
+		}
+		
+		agt = new AgentsTrail(lines.length);
+		Vec3D trans = new Vec3D(x_min, y_min, z_min);
+		System.out.printf("%f, %f, %f\n", x_max - x_min, y_max - y_min, z_max - z_min);
+		bX = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
+		bY = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
+		bZ = (int) (Math.ceil((z_max - z_min) / ratio) * ratio);
+		System.out.printf("%d, %d, %d\n", bX, bY, bZ);
+		DIMX = bX;
+		DIMY = bY;
+		DIMZ = bZ;
+		trans.addSelf(new Vec3D(DIMX / 2, DIMY / 2, DIMZ / 2));
+		for (Vec3D v : outlines) v.subSelf(trans);
+		agt.createAgents(lines.length, scores, outlines);
+		
+		
+	}
+	
+	
+	
+	
+	void displayOutline() {
+		for (Vec3D v : outlines) {
+			stroke(250,0,250);
+			strokeWeight(4);
+			noFill();
+			point(v.x, v.y, v.z);
+		}
+		
+	}
+	
+	
 	void displayStarts() {
 		for (Vec3D v : starts) {
 			stroke(150);
@@ -230,7 +294,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			point(v.x, v.y, v.z);
 			pushMatrix();
 			translate(v.x, v.y, v.z);
-			box(20);
+			//box(20);
 			popMatrix();
 		}
 	}

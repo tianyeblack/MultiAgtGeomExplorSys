@@ -81,6 +81,7 @@ public class Agent {
 
 	public void run(int iteration) {
 		if (runToggle == true) {
+<<<<<<< HEAD
 			for (int i = 0; i < agents.size(); i++) {
 				Agent a = agents.get(i);
 				dist_to_start[i] = loc.distanceTo(a.start);
@@ -93,6 +94,15 @@ public class Agent {
 			if (agentType.equals("c")) {
 				moveOnSrf(onSrfMotion);
 				followTrails(trailFollow);
+=======
+		//	if (agentType.equals("a") || agentType.equals("b")) {
+				flock();
+		//	}
+			//attractFaces(faceAttraction);
+			if (agentType.equals("b")) {
+				//moveOnSrf(onSrfMotion);
+				//followTrails(trailFollow);
+>>>>>>> FETCH_HEAD
 			}
 			if (iteration % every == 0) {
 				dropTrail(trailNum);
@@ -106,6 +116,7 @@ public class Agent {
 		alignment(alignment);
 	}
 
+<<<<<<< HEAD
 	public void agentConnection(float view, ArrayList<AgentLine> connections, int iteration) {
 		if (iteration % every == 0 && runToggle == true) {
 			int count = 0;
@@ -122,6 +133,9 @@ public class Agent {
 		}
 	}
 
+=======
+	
+>>>>>>> FETCH_HEAD
 	public void update() {
 		if (runToggle == true) {
 			vel.addSelf(acc);

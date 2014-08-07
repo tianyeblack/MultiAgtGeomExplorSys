@@ -7,8 +7,13 @@ import java.util.ArrayList;
 import toxi.geom.Vec3D;
 
 public class AgentsTrail {
+	
+	//ratio between agents of type b and c 
+	public static final double agentRatio = 0.8;
+	
+	
 	//level where agents of type 1 are being created 
-	static int creationLevel = 50;
+	static int creationLevel = 10;
 	ArrayList<Agent> agents;
 	ArrayList<AgentLine> connections;
 
@@ -51,7 +56,8 @@ public class AgentsTrail {
 		} else if (type == 2) {
 			for (Agent a : agents) {
 				if (a.start.z() >= creationLevel) {
-					if (Math.random() >= 0.5) a.setType("b");
+					
+					if (Math.random() >= agentRatio) a.setType("b");
 					else a.setType("c");
 				}
 			}
