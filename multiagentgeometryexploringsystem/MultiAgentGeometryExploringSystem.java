@@ -38,8 +38,9 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	int movieCounter ;
 	boolean videoRecord = false;
 	int counter = 0;
-	int pop=50;
+	int pop=100;
 	boolean runToggle = true;
+	boolean runAttraction = true;
 	boolean capture = false;
 	boolean record = false;
 	boolean strok = false;
@@ -53,7 +54,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	int bY;
 	int bZ;
 	//Affects the mesh	
-	float ISO = 0.5f;
+	float ISO = 0.9f;
 	//Affects the resolution and the FrameRate
 	int GRID = 200;
 	int GRIDX;
@@ -63,7 +64,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	int DIM = 3000;
 
 	int DIMX, DIMY, DIMZ;
-	int ratio = 3;
+	int ratio = 2;
 	float isoBrushSize = ratio;
 	float isoBrushDensity = 1f;
 
@@ -81,7 +82,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		cam = new PeasyCam(this, 600);
 //		cam.lookAt(800, -200, 800);
 
-		getGeometry("src/data/catenary_mesh_relaxed_03a.txt");
+		getGeometry("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
 	//	getBoundary("src/data/catenary_mesh_relaxed_04_outlines.txt");
 		
 		
@@ -97,7 +98,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		surfaceA = new ArrayIsoSurface(volumeA);
 		surfaceB = new ArrayIsoSurface(volumeB);
 		surfaceC = new ArrayIsoSurface(volumeC);
-		brushA = new RoundBrush(volumeA, isoBrushSize);
+		brushA = new RoundBrush(volumeA, isoBrushSize*2);
 		brushB = new RoundBrush(volumeB, 6f);
 		brushC = new RoundBrush(volumeC, 4f);
 
@@ -384,6 +385,9 @@ void drawLines(){
 		}
 		if (key == 'n') {
 			runToggle = !runToggle;
+		}
+		if (key == 'a' || key == 'A') {
+			runAttraction= !runAttraction;
 		}
 		if (key == 'p') {
 			record= !record;

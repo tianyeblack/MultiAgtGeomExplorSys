@@ -5,24 +5,24 @@ import java.util.ArrayList;
 import toxi.geom.Vec3D;
 
 public class Agent {
-	static final float maxvel = 2;
-	static final float maxForce = 10;
+	static final float maxvel = 1;
+	static final float maxForce = 2;
 	static final int every = 5;
 	static final int trailNum = 200;
 
 	static final float alignment = 0.03f;
-	static final float cohesion = 0.9f;
-	static final float separation = 0.0f;
+	static final float cohesion = 0.001f;
+	static final float separation = 5f;
 
-	static final float faceAttraction = 0.2f;
-	static final float onSrfMotion = 0.05f;
+	static float faceAttraction = 0;
+	static final float onSrfMotion = 0.4f;
 	static final float trailFollow = 0.05f;
 
 	static final int fovAlign = 100;
-	static final int fovCoh = 200;
-	static final int fovSep = 200;
+	static final int fovCoh = 100;
+	static final int fovSep = 400;
 	static final int fovScore = 300;
-	static final int overkillDist = 5;
+	static final int overkillDist = 105;
 
 	static final float thresh = 50f;
 	static final float agentBoxSize = 10f;
@@ -34,10 +34,12 @@ public class Agent {
 	public Vec3D start;						// starting point
 	ArrayList<Vec3D> trail;					// trail of this agent
 	boolean runToggle;						// moving or stopping
+	boolean runAttraction;						// getting attracted by the input geometry
 	float score;							// property 1
 	String agentType;						// meaningful name for agents type
 	ArrayList<Agent> agents;
-
+	int counter=0;
+	
 	Agent(int _ID, Vec3D _start, float _score, String _agentType, ArrayList<Agent> _agents) {
 		ID = _ID;
 		start = new Vec3D(_start.x(), _start.y(), _start.z());
@@ -80,13 +82,30 @@ public class Agent {
 		//	if (agentType.equals("a") || agentType.equals("b")) {
 				flock();
 		//	}
-			//attractFaces(faceAttraction);
+				
+				
+			//if (counter==100){
+			//	println("attraction on");
+				faceAttraction=0.05f;
+			//}
+		//attractFaces(faceAttraction);
+			
 			if (agentType.equals("b")) {
-				//moveOnSrf(onSrfMotion);
-				//followTrails(trailFollow);
+			//	moveOnSrf(onSrfMotion);
+				followTrails(trailFollow);
 			}
+			  
+			
+				  
+			  
 			dropTrail(every, trailNum, iteration);
 		}
+	
+	}
+
+	private void println(String string) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void flock() {
@@ -158,7 +177,8 @@ public class Agent {
 	private void followTrails(float magnitude) {
 		int cloAID = -1;
 		int cloTID = -1;
-		float cloDist = 1000;
+		//
+		float cloDist = 500;
 		Vec3D closestTrail = new Vec3D();
 		Vec3D closestTrailFWD = new Vec3D();
 		Vec3D steering = new Vec3D();
@@ -184,7 +204,7 @@ public class Agent {
 
 			Vec3D mid = getNormalPoint(loc, closestTrail, closestTrailFWD);
 			float distance = loc.distanceTo(mid);
-			if (distance < 50) {
+			if (distance < overkillDist*2) {
 				seek(mid, magnitude);
 				Vec3D heading = closestTrailFWD.sub(closestTrail);
 				steering.addSelf(heading);

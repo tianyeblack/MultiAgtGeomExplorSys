@@ -13,7 +13,7 @@ public class AgentsTrail {
 	
 	
 	//level where agents of type 1 are being created 
-	static int creationLevel = 10;
+	static int creationLevel = 0;
 	ArrayList<Agent> agents;
 
 	public AgentsTrail(int size) {
