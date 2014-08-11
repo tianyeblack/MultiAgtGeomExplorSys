@@ -15,6 +15,7 @@ public class AgentsTrail {
 	//level where agents of type 1 are being created 
 	static int creationLevel = 0;
 	ArrayList<Agent> agents;
+	ArrayList<AgentLine> connections;
 
 	public AgentsTrail(int size) {
 		agents = new ArrayList<Agent>(size);
@@ -35,11 +36,16 @@ public class AgentsTrail {
 		for (Agent a : agents) starts.add(a.start);
 		return starts;
 	}
+	
+	public ArrayList<AgentLine> getConnections() {
+		return connections;
+	}
 
 	public void createAgents(int pop, float[] scores, Vec3D[] starts) {
 		for (int i = 0; i < pop; i++) {
-			agents.add(new Agent(i, starts[i], scores[i], "", agents));
+			agents.add(new Agent(i, starts[i], scores[i], "", agents, pop));
 		}
+		connections = new ArrayList<AgentLine>();
 	}
 
 	public void assignAgentsType(int type) {
@@ -78,6 +84,10 @@ public class AgentsTrail {
 			Agent a = agents.get(i);
 			a.run(iteration);
 		}
+		for (int i = 0; i < agents.size(); i++) {
+			Agent a = agents.get(i);
+			a.agentConnection(10, connections, iteration);
+		}
 	}
 	
 	public void exportText(int frameCount) {
@@ -95,9 +105,6 @@ public class AgentsTrail {
 		output.flush();
 		output.close();
 	}
-	
-	
-	
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
