@@ -26,6 +26,9 @@ public class Agent {
 
 	static final float thresh = 50f;
 	static final float agentBoxSize = 10f;
+	static float a;
+	static float b;
+	static float c;
 
 	int ID;									// identification in container
 	Vec3D loc;								// current location
@@ -51,18 +54,9 @@ public class Agent {
 		start = new Vec3D(_start.x(), _start.y(), _start.z());
 		loc = new Vec3D(_start.x(), _start.y(), _start.z());
 		acc = new Vec3D();
-		runToggle = true;
+		runToggle = false;
 		score = _score;
 		agentType = _agentType;
-		if (agentType.equals("a")) {
-			vel = new Vec3D(0, 0, (float)(2 * Math.random() - 1));
-		} else if (agentType.equals("b")) {
-			vel = new Vec3D((float)(8 * Math.random() - 4), (float)(8 * Math.random() - 4), 0);
-		} else if (agentType.equals("c")) {
-			vel = new Vec3D((float)(8 * Math.random() - 4), (float)(8 * Math.random() - 4), 0);
-		} else {
-			vel = new Vec3D();
-		}
 		agents = _agents;
 		trail = new ArrayList<Vec3D>();
 		dist_to_agent = new float[_pop];
@@ -79,6 +73,15 @@ public class Agent {
 
 	public void setType(String agtType) {
 		agentType = agtType;
+		if (agentType.equals("a")) {
+			vel = new Vec3D(0, 0, (float)(2 * Math.random() - 1));
+		} else if (agentType.equals("b")) {
+			vel = new Vec3D((float)(8 * Math.random() - 4), (float)(8 * Math.random() - 4), 0);
+		} else if (agentType.equals("c")) {
+			vel = new Vec3D((float)(8 * Math.random() - 4), (float)(8 * Math.random() - 4), 0);
+		} else {
+			vel = new Vec3D();
+		}
 	}
 
 	public String getType() {
@@ -87,12 +90,16 @@ public class Agent {
 
 	public void run(int iteration) {
 		if (runToggle == true) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> FETCH_HEAD
 			for (int i = 0; i < agents.size(); i++) {
 				Agent a = agents.get(i);
 				dist_to_start[i] = loc.distanceTo(a.start);
 				dist_to_agent[i] = loc.distanceTo(a.loc);
 			}
+<<<<<<< HEAD
 			//	if (agentType.equals("a") || agentType.equals("b")) {
 			flock();
 			//	}
@@ -126,6 +133,18 @@ public class Agent {
 				moveOnSrf(onSrfMotion);
 				followTrails(trailFollow);
 
+=======
+//			flock();
+//			attractFaces(faceAttraction);
+//			if (agentType.equals("c")) {
+//				moveOnSrf(onSrfMotion);
+//				followTrails(trailFollow);
+//				flock();
+//			}
+			followParaboloid(1.0f);
+			if (iteration % every == 0) {
+				dropTrail(trailNum);
+>>>>>>> FETCH_HEAD
 			}
 
 
@@ -144,7 +163,10 @@ public class Agent {
 		alignment(alignment);
 	}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> FETCH_HEAD
 	public void agentConnection(float view, ArrayList<AgentLine> connections, int iteration) {
 		if (iteration % every == 0 && runToggle == true) {
 			int count = 0;
@@ -160,9 +182,14 @@ public class Agent {
 			}
 		}
 	}
+<<<<<<< HEAD
 
 
 	public void update() {
+=======
+	
+	void update() {
+>>>>>>> FETCH_HEAD
 		if (runToggle == true) {
 			vel.addSelf(acc);
 			vel.limit(maxvel);
@@ -317,6 +344,22 @@ public class Agent {
 		acc.addSelf(steering);
 	}
 
+	private float paraboloid(float x, float y) {
+		float z = c * (y * y / (b * b) - x * x / (a * a));
+		return z;
+	}
+	
+	private void followParaboloid(float magnitude) {
+		float new_x, new_y;
+		if (loc.x < 0) new_x = loc.x + magnitude;
+		else if (loc.x > 0) new_x = loc.x - magnitude;
+		else new_x = loc.x;
+		if (loc.y < 0) new_y = loc.y + magnitude;
+		else if (loc.y > 0) new_y = loc.y - magnitude;
+		else new_y = loc.y;
+		Vec3D towards = new Vec3D(new_x, new_y, paraboloid(new_x, new_y));
+		acc.addSelf(towards.subSelf(loc));
+	}
 	private Vec3D getNormalPoint(Vec3D p, Vec3D a, Vec3D b) {
 		Vec3D ap = p.sub(a);
 		Vec3D ab = b.sub(a);
