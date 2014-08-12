@@ -89,13 +89,13 @@ public class Agent {
 				dist_to_start[i] = loc.distanceTo(a.start);
 				dist_to_agent[i] = loc.distanceTo(a.loc);
 			}
-//			flock();
-//			attractFaces(faceAttraction);
-//			if (agentType.equals("c")) {
-//				moveOnSrf(onSrfMotion);
-//				followTrails(trailFollow);
-//				flock();
-//			}
+			//			flock();
+			//			attractFaces(faceAttraction);
+			//			if (agentType.equals("c")) {
+			moveOnSrf(onSrfMotion);
+			followTrails(trailFollow);
+			flock();
+			//			}
 			followParaboloid(1.0f);
 			if (iteration % every == 0) {
 				dropTrail(trailNum);
@@ -124,7 +124,7 @@ public class Agent {
 			}
 		}
 	}
-	
+
 	void update() {
 		if (runToggle == true) {
 			vel.addSelf(acc);
@@ -283,7 +283,7 @@ public class Agent {
 		float z = c * (y * y / (b * b) - x * x / (a * a));
 		return z;
 	}
-	
+
 	private void followParaboloid(float magnitude) {
 		float new_x, new_y;
 		if (loc.x < 0) new_x = loc.x + magnitude;

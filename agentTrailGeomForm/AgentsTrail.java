@@ -17,20 +17,14 @@ public class AgentsTrail {
 	public int DIMX = 1000, DIMY = 1000, DIMZ =200;
 	//Affects the resolution and the FrameRate
 	public int GRIDX = 250, GRIDY = 250, GRIDZ = 40;
-	public VolumetricSpace volumeA;
-	public VolumetricSpace volumeB;
-	public VolumetricSpace volumeC;
+	public VolumetricSpace volumeA, volumeB, volumeC;
 	
 	//level where agents of type 1 are being created 
 	public int creationLevel = 10;
 	ArrayList<Agent> agents;
 	ArrayList<AgentLine> connections;
-	public Vec3D[] geo_starts;
-	public Vec3D[] outlines;
-	public Vec3D[] twod_plane;
-	public float[] geo_scores;
-	public float[] out_scores;
-	public float[] twod_scores;
+	public Vec3D[] geo_starts, outlines, twod_plane;
+	public float[] geo_scores, out_scores, twod_scores;
 
 	protected AgentsTrail() {
 		agents = new ArrayList<Agent>();

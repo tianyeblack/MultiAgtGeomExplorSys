@@ -62,9 +62,9 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		//		cam.lookAt(800, -200, 800);
 		agt = AgentsTrail.getInstance();
 
-//		getGeometry("src/data/catenary_mesh_relaxed_03.txt");
+		getGeometry("src/data/catenary_mesh_relaxed_03.txt");
 //		getBoundary("src/data/catenary_mesh_relaxed_04_outlines.txt");
-		get2DPlane("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
+//		get2DPlane("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
 
 		agt.assignAgentsType(1);
 		agt.assignAgentsType(2);
@@ -78,8 +78,6 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		gfx = new ToxiclibsSupport(this);
 		ui = new ControlP5(this);
 		ui.setAutoDraw(false);
-			
-
 		ui.addSlider("ISO",0,1,ISO,20,20,300,14);
 		//ui.addButton ("Isosruface",20,20,300,14));
 	}
@@ -110,12 +108,15 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			drawTrails();
 			surfaceA.reset();
 			surfaceA.computeSurfaceMesh(meshA, ISO);
+			meshA.computeVertexNormals();
 
 			surfaceB.reset();
 			surfaceB.computeSurfaceMesh(meshB, ISO);
+			meshB.computeVertexNormals();
 
 			surfaceC.reset();
 			surfaceC.computeSurfaceMesh(meshC, ISO);
+			meshC.computeVertexNormals();
 		}
 
 		if (strok) {
@@ -147,8 +148,6 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		if (ui.window(this).isMouseOver()) cam.setActive(false);
 		else cam.setActive(true);
 		gui();
-
-
 	}
 
 	void gui() {
@@ -159,6 +158,10 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		hint(ENABLE_DEPTH_TEST);
 	}
 
+	void getStructure(String filename) {
+		
+	}
+	
 	void get2DPlane(String filename) {
 		float x_min, y_min, x_max, y_max;
 		x_min = Float.MAX_VALUE;
@@ -256,7 +259,6 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			else if (z_cur > z_max) z_max = z_cur;
 			agt.outlines[i]= new Vec3D (x_cur, y_cur, z_cur);
 			agt.out_scores[i] = 0f;
-//			println (outlines[i]); 
 		}
 		
 		Vec3D trans = new Vec3D(x_min, y_min, z_min);
