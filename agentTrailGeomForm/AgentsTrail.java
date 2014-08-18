@@ -12,7 +12,7 @@ public class AgentsTrail {
 	private static AgentsTrail _instance = null;
 	
 	//ratio between agents of type b and c 
-	public static final double agentRatio = 0.8;
+	public static final double agentRatio = 0.5;
 	// Dimensions of the space we are working
 	public int DIMX = 1000, DIMY = 1000, DIMZ =200;
 	//Affects the resolution and the FrameRate
@@ -22,11 +22,8 @@ public class AgentsTrail {
 	public VolumetricSpace volumeC;
 	
 	//level where agents of type 1 are being created 
-<<<<<<< HEAD
 	static int creationLevel = 0;
-=======
-	public int creationLevel = 10;
->>>>>>> FETCH_HEAD
+
 	ArrayList<Agent> agents;
 	ArrayList<AgentLine> connections;
 	public Vec3D[] geo_starts;
@@ -125,10 +122,10 @@ public class AgentsTrail {
 			Agent a = agents.get(i);
 			a.run(iteration);
 		}
-//		for (int i = 0; i < agents.size(); i++) {
-//			Agent a = agents.get(i);
-//			a.agentConnection(10, connections, iteration);
-//		}
+		for (int i = 0; i < agents.size(); i++) {
+			Agent a = agents.get(i);
+			a.agentConnection(10, connections, iteration);
+		}
 	}
 	
 	public void switchAgents() {

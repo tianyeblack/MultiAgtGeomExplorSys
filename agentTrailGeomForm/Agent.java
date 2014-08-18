@@ -12,16 +12,16 @@ public class Agent {
 
 	static final float alignment = 0.03f;
 	static final float cohesion = 0.001f;
-	static final float separation = 5f;
+	static final float separation = .1f;
 
-	static float faceAttraction = 0;
-	static final float onSrfMotion = 0.4f;
-	static final float trailFollow = 0.05f;
+	static float faceAttraction = .3f;
+	static final float onSrfMotion = .1f;
+	static final float trailFollow = 0.5f;
 
-	static final int fovAlign = 100;
+	static final int fovAlign = 300;
 	static final int fovCoh = 100;
-	static final int fovSep = 400;
-	static final int fovScore = 300;
+	static final int fovSep = 200;
+	static final int fovScore = 200;
 	static final int overkillDist = 105;
 
 	static final float thresh = 50f;
@@ -37,13 +37,13 @@ public class Agent {
 	public Vec3D start;						// starting point
 	ArrayList<Vec3D> trail;					// trail of this agent
 	boolean runToggle;						// moving or stopping
-	boolean runAttraction;						// getting attracted by the input geometry
+	boolean runAttraction;					// getting attracted by the input geometry
 	float score;							// property 1
 	String agentType;						// meaningful name for agents type
 	ArrayList<Agent> agents;
 	int counter=0;
 	
-//	Agent(int _ID, Vec3D _start, float _score, String _agentType, ArrayList<Agent> _agents) {
+
 
 	float[] dist_to_agent;
 	float[] dist_to_start;
@@ -87,70 +87,61 @@ public class Agent {
 	public String getType() {
 		return agentType;
 	}
-
+int frameCounter=0;
 	public void run(int iteration) {
 		if (runToggle == true) {
-<<<<<<< HEAD
 
-=======
->>>>>>> FETCH_HEAD
 			for (int i = 0; i < agents.size(); i++) {
 				Agent a = agents.get(i);
 				dist_to_start[i] = loc.distanceTo(a.start);
 				dist_to_agent[i] = loc.distanceTo(a.loc);
 			}
-<<<<<<< HEAD
+
 			//	if (agentType.equals("a") || agentType.equals("b")) {
-			flock();
+			//flock();
 			//	}
-			attractFaces(faceAttraction);
+			flock();
+			
+			
+			if (agentType.equals("a")) {
+				moveOnSrf(onSrfMotion);
+				//followTrails(trailFollow);
+			}
+
+			if (agentType.equals("b")) {
+				flock();
+				//attractFaces(faceAttraction/5);
+				//followTrails(trailFollow);
+			}
+			  
+//				
 			if (agentType.equals("c")) {
 				moveOnSrf(onSrfMotion);
-				followTrails(trailFollow);
-
-		//	if (agentType.equals("a") || agentType.equals("b")) {
-				flock();
-		//	}
-				
-				
-			//if (counter==100){
-			//	println("attraction on");
-				faceAttraction=0.05f;
-			//}
-		//attractFaces(faceAttraction);
-			
-			if (agentType.equals("b")) {
-
-				moveOnSrf(onSrfMotion);
-				followTrails(trailFollow);
+				attractFaces(faceAttraction/10);
 			}
-			  
-			
-				  
-			  
-			dropTrail(every, trailNum, iteration);
+//				
+		
 
-				moveOnSrf(onSrfMotion);
-				followTrails(trailFollow);
-
-=======
-//			flock();
-//			attractFaces(faceAttraction);
-//			if (agentType.equals("c")) {
-//				moveOnSrf(onSrfMotion);
-//				followTrails(trailFollow);
-//				flock();
-//			}
-			followParaboloid(1.0f);
-			if (iteration % every == 0) {
-				dropTrail(trailNum);
->>>>>>> FETCH_HEAD
+			if (frameCounter<50 || frameCounter>200){
+				if (agentType.equals("b")) {
+					attractFaces(faceAttraction);
+				}
+//					
+				
 			}
+	
+			if (iteration % every == 0 && frameCounter>0 ) {
+				dropTrail(every,trailNum,iteration);
 
+			}
+			
+			frameCounter++;
 
+			}
 		}
 	
-	}
+	
+	
 
 	private void println(String string) {
 		// TODO Auto-generated method stub
@@ -163,15 +154,12 @@ public class Agent {
 		alignment(alignment);
 	}
 
-<<<<<<< HEAD
 
-=======
->>>>>>> FETCH_HEAD
 	public void agentConnection(float view, ArrayList<AgentLine> connections, int iteration) {
 		if (iteration % every == 0 && runToggle == true) {
 			int count = 0;
 			for (int i = 0; i < agents.size() && count <= 3; i++) {
-				if (dist_to_agent[i] < view && dist_to_agent[i] > 4) {
+				if (dist_to_agent[i] < view && dist_to_agent[i] > 1) {
 					count++;
 					Agent a = agents.get(i);
 					connections.add(new AgentLine(this, a, 
@@ -182,14 +170,13 @@ public class Agent {
 			}
 		}
 	}
-<<<<<<< HEAD
 
 
-	public void update() {
-=======
+
+
 	
 	void update() {
->>>>>>> FETCH_HEAD
+
 		if (runToggle == true) {
 			vel.addSelf(acc);
 			vel.limit(maxvel);
@@ -212,7 +199,7 @@ public class Agent {
 				if (a.score < thisScore) {
 					highID = a.ID;
 					thisScore = a.score;
-					if (dist_to_start[i] < 40) runToggle = false;
+					if (dist_to_start[i] < 2) runToggle = false;
 				}
 			}
 		}
@@ -227,8 +214,8 @@ public class Agent {
 		int count = 0;
 		for (int i = 0; i < agents.size(); i++) {
 			Agent a = agents.get(i);
-			if (dist_to_start[i] > 0 && dist_to_start[i] < 100) {
-				if (dist_to_start[i] < 50) {
+			if (dist_to_start[i] > 0 && dist_to_start[i] < 200) {
+				if (dist_to_start[i] < 60) {
 					sum.addSelf(a.start);
 					count++;
 				}
