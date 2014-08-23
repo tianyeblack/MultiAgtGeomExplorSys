@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import toxi.geom.Vec3D;
 
 public class Agent {
-	static final float maxvel = 1;
+	static final float maxvel = 2;
 	static final float maxForce = 2;
 	static final int every = 5;
 	static final int trailNum = 200;
 
-	static final float alignment = 0.03f;
-	static final float cohesion = 0.001f;
-	static final float separation = 5f;
+	static final float alignment = 1f;
+	static final float cohesion = 1f;
+	static final float separation = 1f;
 
 	static float faceAttraction = 0;
 	static final float onSrfMotion = 0.4f;
@@ -29,6 +29,7 @@ public class Agent {
 	static float a;
 	static float b;
 	static float c;
+	static AgentsTrail agt = AgentsTrail.getInstance();
 
 	int ID;									// identification in container
 	Vec3D loc;								// current location
@@ -40,7 +41,6 @@ public class Agent {
 	boolean runAttraction;						// getting attracted by the input geometry
 	float score;							// property 1
 	String agentType;						// meaningful name for agents type
-	ArrayList<Agent> agents;
 	int counter=0;
 	
 //	Agent(int _ID, Vec3D _start, float _score, String _agentType, ArrayList<Agent> _agents) {
@@ -48,8 +48,7 @@ public class Agent {
 	float[] dist_to_agent;
 	float[] dist_to_start;
 
-	Agent(int _ID, Vec3D _start, float _score, String _agentType, ArrayList<Agent> _agents, int _pop) {
-
+	Agent(int _ID, Vec3D _start, float _score, String _agentType, int _pop) {
 		ID = _ID;
 		start = new Vec3D(_start.x(), _start.y(), _start.z());
 		loc = new Vec3D(_start.x(), _start.y(), _start.z());
@@ -57,7 +56,6 @@ public class Agent {
 		runToggle = false;
 		score = _score;
 		agentType = _agentType;
-		agents = _agents;
 		trail = new ArrayList<Vec3D>();
 		dist_to_agent = new float[_pop];
 		dist_to_start = new float[_pop];
@@ -80,7 +78,7 @@ public class Agent {
 		} else if (agentType.equals("c")) {
 			vel = new Vec3D((float)(8 * Math.random() - 4), (float)(8 * Math.random() - 4), 0);
 		} else {
-			vel = new Vec3D();
+			vel = new Vec3D(0, 0, (float) Math.random() * 2);
 		}
 	}
 
@@ -90,50 +88,12 @@ public class Agent {
 
 	public void run(int iteration) {
 		if (runToggle == true) {
-<<<<<<< HEAD
-
-=======
->>>>>>> FETCH_HEAD
+			ArrayList<Agent> agents = agt.agents;
 			for (int i = 0; i < agents.size(); i++) {
 				Agent a = agents.get(i);
 				dist_to_start[i] = loc.distanceTo(a.start);
 				dist_to_agent[i] = loc.distanceTo(a.loc);
 			}
-<<<<<<< HEAD
-			//	if (agentType.equals("a") || agentType.equals("b")) {
-			flock();
-			//	}
-			attractFaces(faceAttraction);
-			if (agentType.equals("c")) {
-				moveOnSrf(onSrfMotion);
-				followTrails(trailFollow);
-
-		//	if (agentType.equals("a") || agentType.equals("b")) {
-				flock();
-		//	}
-				
-				
-			//if (counter==100){
-			//	println("attraction on");
-				faceAttraction=0.05f;
-			//}
-		//attractFaces(faceAttraction);
-			
-			if (agentType.equals("b")) {
-
-				moveOnSrf(onSrfMotion);
-				followTrails(trailFollow);
-			}
-			  
-			
-				  
-			  
-			dropTrail(every, trailNum, iteration);
-
-				moveOnSrf(onSrfMotion);
-				followTrails(trailFollow);
-
-=======
 //			flock();
 //			attractFaces(faceAttraction);
 //			if (agentType.equals("c")) {
@@ -141,20 +101,12 @@ public class Agent {
 //				followTrails(trailFollow);
 //				flock();
 //			}
-			followParaboloid(1.0f);
+//			followParaboloid(1.0f);
+			heading(agt.supports, 1f);
 			if (iteration % every == 0) {
-				dropTrail(trailNum);
->>>>>>> FETCH_HEAD
+				dropTrail(every, trailNum, iteration);
 			}
-
-
 		}
-	
-	}
-
-	private void println(String string) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	private void flock() {
@@ -162,14 +114,11 @@ public class Agent {
 		cohesion(cohesion);
 		alignment(alignment);
 	}
-
-<<<<<<< HEAD
-
-=======
->>>>>>> FETCH_HEAD
+	
 	public void agentConnection(float view, ArrayList<AgentLine> connections, int iteration) {
 		if (iteration % every == 0 && runToggle == true) {
 			int count = 0;
+			ArrayList<Agent> agents = agt.agents;
 			for (int i = 0; i < agents.size() && count <= 3; i++) {
 				if (dist_to_agent[i] < view && dist_to_agent[i] > 4) {
 					count++;
@@ -182,18 +131,20 @@ public class Agent {
 			}
 		}
 	}
-<<<<<<< HEAD
-
-
-	public void update() {
-=======
 	
-	void update() {
->>>>>>> FETCH_HEAD
+	public void update() {
 		if (runToggle == true) {
 			vel.addSelf(acc);
 			vel.limit(maxvel);
+			int[] temp1 = Utility.coorToIndex(loc, agt.DIMX, agt.DIMY, agt.DIMZ, agt.ratio);
 			loc.addSelf(vel);
+			int[] temp2 = Utility.coorToIndex(loc, agt.DIMX, agt.DIMY, agt.DIMZ, agt.ratio);
+			if (0f != agt.volumeS.getVoxelAt(agt.volumeS.getIndexFor(temp1[0], temp1[1], temp1[2])) &&
+					0f == agt.volumeS.getVoxelAt(agt.volumeS.getIndexFor(temp2[0], temp2[1], temp2[2]))) {
+				vel.invert();
+				loc.addSelf(vel);
+				loc.addSelf(vel);
+			}
 			acc.clear();
 		}
 	}
@@ -206,6 +157,7 @@ public class Agent {
 		int highID = 0;
 		float thisScore = score;
 
+		ArrayList<Agent> agents = agt.agents;
 		for (int i = 0; i < agents.size(); i++) {
 			Agent a = agents.get(i);
 			if (dist_to_start[i] > 0 && dist_to_start[i] < fovScore) {
@@ -225,6 +177,7 @@ public class Agent {
 	private void attractFaces(float magnitude) {
 		Vec3D sum = new Vec3D();
 		int count = 0;
+		ArrayList<Agent> agents = agt.agents;
 		for (int i = 0; i < agents.size(); i++) {
 			Agent a = agents.get(i);
 			if (dist_to_start[i] > 0 && dist_to_start[i] < 100) {
@@ -245,6 +198,7 @@ public class Agent {
 	}
 
 	private void followTrails(float magnitude) {
+		ArrayList<Agent> agents = agt.agents;
 		int cloAID = -1;
 		int cloTID = -1;
 		//
@@ -272,7 +226,7 @@ public class Agent {
 			if (cloTID < cloA.trail.size() - 1) closestTrailFWD.set(cloA.trail.get(cloTID + 1));
 			else if (cloTID == cloA.trail.size() - 1) closestTrailFWD.set(cloA.trail.get(cloTID));
 
-			Vec3D mid = getNormalPoint(loc, closestTrail, closestTrailFWD);
+			Vec3D mid = Utility.getNormalPoint(loc, closestTrail, closestTrailFWD);
 			float distance = loc.distanceTo(mid);
 			if (distance < overkillDist*2) {
 				seek(mid, magnitude);
@@ -287,6 +241,7 @@ public class Agent {
 	}
 
 	private void alignment(float magnitude) {
+		ArrayList<Agent> agents = agt.agents;
 		Vec3D steering = new Vec3D();
 		// We are creating a new empty vector to be added to the agent's acceleration.
 		// This will be translated into a change in direction based on the calculations.
@@ -310,6 +265,7 @@ public class Agent {
 	}
 
 	private void cohesion(float magnitude) {
+		ArrayList<Agent> agents = agt.agents;
 		Vec3D sum = new Vec3D();
 		int count = 0;
 		for (int i = 0; i < agents.size(); i++) {
@@ -327,6 +283,7 @@ public class Agent {
 	}
 
 	private void separation(float magnitude) {
+		ArrayList<Agent> agents = agt.agents;
 		Vec3D steering = new Vec3D();
 		int count = 0;
 		for (int i = 0; i < agents.size(); i++) {
@@ -344,11 +301,6 @@ public class Agent {
 		acc.addSelf(steering);
 	}
 
-	private float paraboloid(float x, float y) {
-		float z = c * (y * y / (b * b) - x * x / (a * a));
-		return z;
-	}
-	
 	private void followParaboloid(float magnitude) {
 		float new_x, new_y;
 		if (loc.x < 0) new_x = loc.x + magnitude;
@@ -357,15 +309,29 @@ public class Agent {
 		if (loc.y < 0) new_y = loc.y + magnitude;
 		else if (loc.y > 0) new_y = loc.y - magnitude;
 		else new_y = loc.y;
-		Vec3D towards = new Vec3D(new_x, new_y, paraboloid(new_x, new_y));
+		Vec3D towards = new Vec3D(new_x, new_y, Utility.paraboloid(new_x, new_y, a, b, c));
 		acc.addSelf(towards.subSelf(loc));
 	}
-	private Vec3D getNormalPoint(Vec3D p, Vec3D a, Vec3D b) {
-		Vec3D ap = p.sub(a);
-		Vec3D ab = b.sub(a);
-		ab.normalize();
-		ab.scaleSelf(ap.dot(ab));
-		return a.add(ab);
+	
+	private void heading(ArrayList<Vec3D> targets, float magnitude) {
+		Vec3D steering = new Vec3D();
+		int count = 0;
+		float[] dist_to_target = new float[targets.size()];
+		for (int i = 0; i < targets.size(); i++) dist_to_target[i] = loc.distanceTo(targets.get(i));
+		for (int i = 0; i < targets.size(); i++) {
+			if (dist_to_target[i] > 0 && dist_to_target[i] < 100) {
+				Vec3D temp = targets.get(i).sub(loc);
+				temp.scaleSelf(1000 / dist_to_target[i], 1000 / dist_to_target[i], 1);
+				steering.addSelf(temp);
+				count++;
+//				Vec3D steeringVector = steer(targets.get(i), false);
+//				steeringVector.scaleSelf(Math.abs(dist_to_target[i] - 100), Math.abs(dist_to_target[i] - 100), 1f);
+//				acc.addSelf(steeringVector);
+			}
+		}
+		if (count > 0) steering.scaleSelf(1.0f / count);
+		steering.scaleSelf(magnitude);
+		acc.addSelf(steering);
 	}
 
 	private void seek(Vec3D target, float factor) {

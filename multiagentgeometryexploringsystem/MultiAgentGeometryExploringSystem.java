@@ -8,15 +8,16 @@ import agentTrailGeomForm.AgentsTrail;
 import controlP5.ControlP5;
 import peasy.PeasyCam;
 import processing.core.PApplet;
+import toxi.geom.AABB;
 import toxi.geom.Vec3D;
+import toxi.geom.mesh.STLReader;
 import toxi.geom.mesh.TriangleMesh;
 import toxi.processing.ToxiclibsSupport;
 import toxi.volume.ArrayIsoSurface;
-import toxi.volume.BoxBrush;
 import toxi.volume.IsoSurface;
+import toxi.volume.MeshVoxelizer;
 import toxi.volume.RoundBrush;
 import toxi.volume.VolumetricBrush;
-import toxi.volume.VolumetricSpaceArray;
 
 
 @SuppressWarnings("serial")
@@ -29,49 +30,31 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	IsoSurface surfaceA;
 	IsoSurface surfaceB;
 	IsoSurface surfaceC;
+	IsoSurface surfaceS;
 	TriangleMesh meshA = new TriangleMesh("meshA");
 	TriangleMesh meshB = new TriangleMesh("meshB");
 	TriangleMesh meshC = new TriangleMesh("meshC");
+	TriangleMesh meshS;
+	MeshVoxelizer voxelizer;
 	ToxiclibsSupport gfx;
 	ControlP5 ui;
 	int movieCounter ;
 	boolean videoRecord = false;
 	int counter = 0;
-<<<<<<< HEAD
-	int pop=100;
-	boolean runToggle = true;
-	boolean runAttraction = true;
-=======
 	boolean runToggle = false;
->>>>>>> FETCH_HEAD
 	boolean capture = false;
 	boolean record = false;
 	boolean strok = false;
 	boolean compute = false;
 	boolean trail = false;
+	boolean runAttraction = false;
 
 	//Box size
-	int bX, bY, bZ;
-	//Affects the mesh	
-<<<<<<< HEAD
-	float ISO = 0.9f;
-	//Affects the resolution and the FrameRate
-	int GRID = 200;
-	int GRIDX;
-	int GRIDY;
-	int GRIDZ;
-	// Dimensions of the space we are working
-	int DIM = 3000;
-
-	int DIMX, DIMY, DIMZ;
-
-	int ratio = 2;
-
-=======
+	int bX = 0, bY = 0, bZ = 0;
+	//Affects the mesh
 	float ISO = 0.5f;
-	
-	int ratio = 4;
->>>>>>> FETCH_HEAD
+
+	int ratio = 1;
 	float isoBrushSize = ratio;
 	float isoBrushDensity = 1f;
 
@@ -81,51 +64,38 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		size(1200, 800, OPENGL);
 		smooth();
 		cam = new PeasyCam(this, 600);
-		//		cam.lookAt(800, -200, 800);
 		agt = AgentsTrail.getInstance();
+		getStructure("src/data/TOPY_MESH_POINTS_01.stl");
+		getStructurePt("src/data/TOPY_MESH_POINTS_01.txt");
+		float[] fs = new float[agt.loads.size()];
+		Vec3D[] vs = new Vec3D[agt.loads.size()];
+		agt.addAgents(agt.loads.size(), fs, agt.loads.toArray(vs));
+		AABB bBox = meshS.getBoundingBox();
+		Vec3D center = bBox.getMax().add(bBox.getMin());
+		center = new Vec3D().sub(new Vec3D(center.x / 2, center.y / 2, center.z / 2));
+		meshS.translate(center);
 
 //		getGeometry("src/data/catenary_mesh_relaxed_03.txt");
 //		getBoundary("src/data/catenary_mesh_relaxed_04_outlines.txt");
-		get2DPlane("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
-
-<<<<<<< HEAD
-		getGeometry("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
-	//	getBoundary("src/data/catenary_mesh_relaxed_04_outlines.txt");
-		
+//		get2DPlane("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
+		agt.setDIMAndGRID(bX, bY, bZ, ratio);
+		voxelizer = new MeshVoxelizer(agt.GRIDX, agt.GRIDY, agt.GRIDZ);
+		agt.volumeS = voxelizer.voxelizeMesh(meshS);
 		
 		agt.assignAgentsType(1);
-		agt.assignAgentsType(2);
-		SCALE = new Vec3D(bX, bY, bZ);
-		GRIDX = bX / ratio;
-		GRIDY = bY / ratio;
-		GRIDZ = bZ / ratio;
-		volumeA = new VolumetricSpaceArray(SCALE, GRIDX, GRIDY, GRIDZ);
-		volumeB = new VolumetricSpaceArray(SCALE, GRIDX, GRIDY, GRIDZ);
-		volumeC = new VolumetricSpaceArray(SCALE, GRIDX, GRIDY, GRIDZ);
-		surfaceA = new ArrayIsoSurface(volumeA);
-		surfaceB = new ArrayIsoSurface(volumeB);
-		surfaceC = new ArrayIsoSurface(volumeC);
-		brushA = new RoundBrush(volumeA, isoBrushSize*2);
-		brushB = new RoundBrush(volumeB, 6f);
-		brushC = new RoundBrush(volumeC, 4f);
-=======
-		agt.assignAgentsType(1);
-		agt.assignAgentsType(2);
+		//		agt.assignAgentsType(2);
 		surfaceA = new ArrayIsoSurface(agt.volumeA);
 		surfaceB = new ArrayIsoSurface(agt.volumeB);
 		surfaceC = new ArrayIsoSurface(agt.volumeC);
 		brushA = new RoundBrush(agt.volumeA, isoBrushSize);
-		brushB = new RoundBrush(agt.volumeB, 6f);
-		brushC = new RoundBrush(agt.volumeC, 4f);
->>>>>>> FETCH_HEAD
+		brushB = new RoundBrush(agt.volumeB, isoBrushSize);
+		brushC = new RoundBrush(agt.volumeC, isoBrushSize);
 
 		gfx = new ToxiclibsSupport(this);
 		ui = new ControlP5(this);
 		ui.setAutoDraw(false);
-			
 
 		ui.addSlider("ISO",0,1,ISO,20,20,300,14);
-		//ui.addButton ("Isosruface",20,20,300,14));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -133,7 +103,10 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		if (record) beginRaw(PDF, "output/msa_catenary_Srf_trails"+ frameCount+".pdf") ;
 		background(255);
 		lights();
-		
+		drawAxes();
+
+		displayPoints(agt.loads, new Vec3D(0, 0, 0), 4);
+		displayPoints(agt.supports, new Vec3D(0, 0, 0), 4);
 		agt.runAgents(frameCount);
 		if (trail == true) {
 			displayTrails();
@@ -145,38 +118,13 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 //		displayOutline();
 
 		// A bounding box for a better view
-		stroke(0, 0, 192);
-		strokeWeight(.5f);
-		noFill();
-		box(bX, bY, bZ);
-
+		displayBox();
+		
 		if (frameCount % 5 == 0 && compute) {
 			drawTrails();
-			surfaceA.reset();
-			surfaceA.computeSurfaceMesh(meshA, ISO);
-
-			surfaceB.reset();
-			surfaceB.computeSurfaceMesh(meshB, ISO);
-
-			surfaceC.reset();
-			surfaceC.computeSurfaceMesh(meshC, ISO);
 		}
 
-		if (strok) {
-			stroke(0.1f);
-		} else {
-			noStroke();
-			fill(0, 0, 255);			
-			gfx.mesh(meshA, true);
-
-			noStroke();
-			fill(0, 255, 0);	
-			gfx.mesh(meshB, true);
-
-			noStroke();
-			fill(255, 0, 0);	
-			gfx.mesh(meshC, true);
-		}
+		displayMeshes(strok);
 
 		if (frameCount == 1 || (frameCount % 20 == 0 && frameCount < 1000)) {
 			agt.exportText(frameCount);
@@ -191,10 +139,22 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		if (ui.window(this).isMouseOver()) cam.setActive(false);
 		else cam.setActive(true);
 		gui();
-
-
 	}
 
+	void drawAxes() {
+		stroke(0);
+		fill(0);
+		strokeWeight(3);
+		point(0, 0, 0);
+		strokeWeight(1);
+		stroke(255, 0, 0);
+		line(0, 0, 0, 500, 0, 0);
+		stroke(0, 255, 0);
+		line(0, 0, 0, 0, 500, 0);
+		stroke(0, 0, 255);
+		line(0, 0, 0, 0, 0, 500);
+	}
+	
 	void gui() {
 		hint(DISABLE_DEPTH_TEST);
 		cam.beginHUD();
@@ -203,12 +163,53 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		hint(ENABLE_DEPTH_TEST);
 	}
 
+	void getStructurePt(String filename) {
+		float x_min, y_min, x_max, y_max, z_min, z_max;
+		z_min = y_min = x_min = Float.MAX_VALUE;
+		z_max = y_max = x_max = Float.MIN_VALUE;
+		String[] lines = loadStrings(filename);
+		println("There are " + lines.length + " lines in the mesh point cloud file...");
+		Vec3D[] strc = new Vec3D[lines.length];
+		for (int i = 0; i < lines.length; i++) {
+			String[] coordinates = split(lines[i].substring(1, lines[i].length() - 1), ", ");
+			float x_cur = Float.parseFloat(coordinates[0]);
+			float y_cur = Float.parseFloat(coordinates[1]);
+			float z_cur = Float.parseFloat(coordinates[2]);
+			if (x_cur < x_min) x_min = x_cur;
+			else if (x_cur > x_max) x_max = x_cur;
+			if (y_cur < y_min) y_min = y_cur;
+			else if (y_cur > y_max) y_max = y_cur;
+			if (z_cur < z_min) z_min = z_cur;
+			else if (z_cur > z_max) z_max = z_cur;
+			strc[i] = new Vec3D(x_cur, y_cur, z_cur);
+		}
+		Vec3D trans = new Vec3D((x_max + x_min) / 2, (y_max + y_min) / 2, (z_max + z_min) / 2);
+		int bx = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
+		int by = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
+		int bz = (int) (Math.ceil((z_max - z_min) / ratio) * ratio);
+		if (bx > bX) bX = bx;
+		if (by > bY) bY = by;
+		if (bz > bZ) bZ = bz;
+		for (Vec3D v : strc) {
+			if (v.z() >= Math.floor(z_max) - 1) agt.loads.add(v.copy());
+			else if (v.z() <= Math.ceil(z_min) + 1) agt.supports.add(v.copy());
+		}
+		for (Vec3D v : agt.loads) v.subSelf(trans);
+		for (Vec3D v : agt.supports) v.subSelf(trans);
+		System.out.printf("%d, %d\n", agt.loads.size(), agt.supports.size());
+		System.out.printf("%f, %f\n", z_max, z_min);
+	}
+	
+	void getStructure(String filename) {
+		STLReader reader = new STLReader();
+		meshS = (TriangleMesh) reader.loadBinary(filename, STLReader.TRIANGLEMESH);
+		System.out.println("1: " + meshS.toString());
+	}
+
 	void get2DPlane(String filename) {
 		float x_min, y_min, x_max, y_max;
-		x_min = Float.MAX_VALUE;
-		y_min = Float.MAX_VALUE;
-		x_max = Float.MIN_VALUE;
-		y_max = Float.MIN_VALUE;
+		y_min = x_min = Float.MAX_VALUE;
+		y_max = x_max = Float.MIN_VALUE;
 		String[] lines=loadStrings (filename);
 		agt.twod_plane = new Vec3D[lines.length];
 		agt.twod_scores = new float[lines.length];
@@ -222,29 +223,22 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			else if (y_cur > y_max) y_max = y_cur;
 			agt.twod_plane[i]= new Vec3D (x_cur, y_cur, 0f);
 			agt.twod_scores[i] = 0f;
-//			println (outlines[i]); 
 		}
-		
-		Vec3D trans = new Vec3D(x_min, y_min, 0);
-		System.out.printf("%f, %f, %f\n", x_max - x_min, y_max - y_min, 0f);
-		bX = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
-		bY = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
-		bZ = (int) (Math.ceil((agt.DIMZ) / ratio) * ratio);
-		System.out.printf("%d, %d, %d\n", bX, bY, bZ);
-		agt.setDIMAndGRID(bX, bY, bZ, ratio);
-		trans.addSelf(new Vec3D(bX / 2, bY / 2, bZ / 2));
+		Vec3D trans = new Vec3D((x_max + x_min) / 2, (y_max + y_min) / 2, 0);
+		int bx = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
+		int by = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
+		int bz = (int) (Math.ceil((agt.DIMZ) / ratio) * ratio);
+		if (bx > bX) bX = bx;
+		if (by > bY) bY = by;
+		if (bz > bY) bZ = bz;
 		for (Vec3D v : agt.twod_plane) v.subSelf(trans);
 		agt.addAgents(lines.length, agt.twod_scores, agt.twod_plane);
 	}
-	
+
 	void getGeometry(String filename) {
 		float x_min, y_min, z_min, x_max, y_max, z_max;
-		x_min = Float.MAX_VALUE;
-		y_min = Float.MAX_VALUE;
-		z_min = Float.MAX_VALUE;
-		x_max = Float.MIN_VALUE;
-		y_max = Float.MIN_VALUE;
-		z_max = Float.MIN_VALUE;
+		z_min = y_min = x_min = Float.MAX_VALUE;
+		z_max = y_max = x_max = Float.MIN_VALUE;
 		String[] lines = loadStrings(filename);
 		println("There are " + lines.length + " lines in the elevation point file..");
 		agt.geo_scores = new float[lines.length];
@@ -264,26 +258,21 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			agt.geo_starts[i] = new Vec3D(x_cur, y_cur, z_cur);
 			agt.geo_scores[i] = Float.parseFloat(parts[1]);
 		}
-		Vec3D trans = new Vec3D(x_min, y_min, z_min);
-		System.out.printf("%f, %f, %f\n", x_max - x_min, y_max - y_min, z_max - z_min);
-		bX = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
-		bY = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
-		bZ = (int) (Math.ceil((z_max - z_min) / ratio) * ratio);
-		System.out.printf("%d, %d, %d\n", bX, bY, bZ);
-		agt.setDIMAndGRID(bX, bY, bZ, ratio);
-		trans.addSelf(new Vec3D(agt.DIMX / 2, agt.DIMY / 2, agt.DIMZ / 2));
+		Vec3D trans = new Vec3D((x_max + x_min) / 2, (y_max + y_min) / 2, (z_max + z_min) / 2);
+		int bx = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
+		int by = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
+		int bz = (int) (Math.ceil((z_max - z_min) / ratio) * ratio);
+		if (bx > bX) bX = bx;
+		if (by > bY) bY = by;
+		if (bz > bZ) bZ = bz;
 		for (Vec3D v : agt.geo_starts) v.subSelf(trans);
 		agt.addAgents(lines.length, agt.geo_scores, agt.geo_starts);
 	}
 
 	void getBoundary(String filename){
 		float x_min, y_min, z_min, x_max, y_max, z_max;
-		x_min = Float.MAX_VALUE;
-		y_min = Float.MAX_VALUE;
-		z_min = Float.MAX_VALUE;
-		x_max = Float.MIN_VALUE;
-		y_max = Float.MIN_VALUE;
-		z_max = Float.MIN_VALUE;
+		z_min = y_min = x_min = Float.MAX_VALUE;
+		z_max = y_max = x_max = Float.MIN_VALUE;
 		String[] lines=loadStrings (filename);
 		agt.outlines = new Vec3D[lines.length];
 		agt.out_scores = new float[lines.length];
@@ -300,40 +289,47 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			else if (z_cur > z_max) z_max = z_cur;
 			agt.outlines[i]= new Vec3D (x_cur, y_cur, z_cur);
 			agt.out_scores[i] = 0f;
-//			println (outlines[i]); 
 		}
-		
-		Vec3D trans = new Vec3D(x_min, y_min, z_min);
-		int bx, by, bz;
-		System.out.printf("%f, %f, %f\n", x_max - x_min, y_max - y_min, z_max - z_min);
-		bx = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
-		by = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
-		bz = (int) (Math.ceil((z_max - z_min) / ratio) * ratio);
-		System.out.printf("%d, %d, %d\n", bx, by, bz);
-		trans.addSelf(new Vec3D(bx / 2, by / 2, bz / 2));
+		Vec3D trans = new Vec3D((x_max + x_min) / 2, (y_max + y_min) / 2, (z_max + z_min) / 2);
+		int bx = (int) (Math.ceil((x_max - x_min) / ratio) * ratio);
+		int by = (int) (Math.ceil((y_max - y_min) / ratio) * ratio);
+		int bz = (int) (Math.ceil((z_max - z_min) / ratio) * ratio);
+		if (bx > bX) bX = bx;
+		if (by > bY) bY = by;
+		if (bz > bZ) bZ = bz;
 		for (Vec3D v : agt.outlines) v.subSelf(trans);
 		agt.addAgents(lines.length, agt.out_scores, agt.outlines);
 	}
+
+	void displayBox() {
+		stroke(0, 0, 128);
+		strokeWeight(1f);
+		noFill();
+		box(bX, bY, bZ);
+	}
+	
+	void displayPoints(ArrayList<Vec3D> points, Vec3D color, float strkWt) {
+		stroke(color.x, color.y, color.z);
+		strokeWeight(strkWt);
+		noFill();
+		for (Vec3D v : points) point(v.x, v.y, v.z);
+	}
 	
 	void displayOutline() {
+		stroke(250,0,250);
+		strokeWeight(4);
+		noFill();
 		for (Vec3D v : agt.outlines) {
-			stroke(250,0,250);
-			strokeWeight(4);
-			noFill();
 			point(v.x, v.y, v.z);
 		}
 	}
-	
+
 	void displayStarts() {
+		stroke(150);
+		strokeWeight(2f);
+		noFill();
 		for (Vec3D v : agt.getStarts()) {
-			stroke(150);
-			strokeWeight(2f);
-			noFill();
 			point(v.x, v.y, v.z);
-			pushMatrix();
-			translate(v.x, v.y, v.z);
-			//box(20);
-			popMatrix();
 		}
 	}
 
@@ -382,21 +378,44 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			}
 		}
 	}
+	
+	void displayMeshes(boolean strk) {
+		if (strk) {
+			stroke(0, 0, 255);			
+			gfx.mesh(meshA, true);
+			stroke(0, 255, 0);
+			gfx.mesh(meshB, true);
+			stroke(255, 0, 0);	
+			gfx.mesh(meshC, true);
+			stroke(128, 128, 128);
+			gfx.mesh(meshS, true);
+		} else {
+			noStroke();
+			fill(0, 0, 200);			
+			gfx.mesh(meshA, true);
+			fill(0, 200, 0);	
+			gfx.mesh(meshB, true);
+			fill(200, 0, 0);	
+			gfx.mesh(meshC, true);
+//			fill(200, 200, 200);
+//			gfx.mesh(meshS, true);
+		}
+	}
 
 	void displayConnections() {
+		stroke(64);
+		strokeWeight(1.0f);
 		ArrayList<AgentLine> connections = agt.getConnections();
 		for (AgentLine l : connections) {
-			stroke(64);
-			strokeWeight(1.0f);
 			Vec3D pta = l.getPta();
 			Vec3D ptb = l.getPtb();
 			line(pta.x, pta.y, pta.z, ptb.x, ptb.y, ptb.z);
 		}
 	}
-	
+
 	void drawLines(){
 		for (Agent a : agt.getAgents()) {
-			
+			a.getClass();
 		}
 	}
 
@@ -425,6 +444,23 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 				}
 			}
 		}
+		for (int i = 0; i < agt.GRIDX; i++) {
+			for (int j = 0; j < agt.GRIDY; i++) {
+				for (int k = 0; k < agt.GRIDZ; k++) {
+					int indexA = agt.volumeA.getIndexFor(i, j, k);
+					int indexB = agt.volumeB.getIndexFor(i, j, k);
+					int indexC = agt.volumeC.getIndexFor(i, j, k);
+					if (0 != agt.volumeA.getVoxelAt(indexA) && 0 != agt.volumeB.getVoxelAt(indexB)) agt.volumeB.setVoxelAt(indexB, 0f);
+					if (0 != agt.volumeA.getVoxelAt(indexB) && 0 != agt.volumeB.getVoxelAt(indexC)) agt.volumeC.setVoxelAt(indexC, 0f);
+				}
+			}
+		}
+		surfaceA.reset();
+		surfaceA.computeSurfaceMesh(meshA, ISO);
+		surfaceB.reset();
+		surfaceB.computeSurfaceMesh(meshB, ISO);
+		surfaceC.reset();
+		surfaceC.computeSurfaceMesh(meshC, ISO);
 	}
 
 	public void keyPressed() {
@@ -440,8 +476,6 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 				println("MOVIE STOPPED!");
 			}
 		}
-
-
 		if (key=='s'){
 			meshA.saveAsSTL(sketchPath(meshA.name + frameCount+ counter + ".stl"));
 			meshB.saveAsSTL(sketchPath(meshB.name + frameCount+ counter + ".stl"));
@@ -454,38 +488,26 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			saveFrame("MSA_agent_cat_Trails" + frameCount + ".png");
 			println("saved a frame");
 		}
-		if (key=='r') {
-			capture= !capture;
-		}
+		if (key=='r') capture= !capture;
 		if (key == 'n') {
 			runToggle = !runToggle;
 			agt.switchAgents();
 		}
-		if (key == 'a' || key == 'A') {
-			runAttraction= !runAttraction;
-		}
-		if (key == 'p') {
-			record= !record;
-		}
-		if (key == 'k') {
-			strok = !strok;
-		}
-		if (key == 'c' ||key == 'C') {
-			compute = !compute;
-		}
+		if (key == 'a' || key == 'A') runAttraction= !runAttraction;
+		if (key == 'p') record= !record;
+		if (key == 'k') strok = !strok;
+		if (key == 'c' ||key == 'C') compute = !compute;
 		if (key == 't') trail = !trail;
 	}
 
 	void recording(){
 		if(videoRecord==true){
-
 			String saveName = "Agents" + "__" + nf(movieCounter, 4) + ".png";
 			saveFrame(saveName);
 			println(saveName);
 			movieCounter+=2;
 		}
 	}
-
 
 	public static void main(String _args[]) {
 		PApplet.main(new String[] { multiagentgeometryexploringsystem.MultiAgentGeometryExploringSystem.class.getName() });

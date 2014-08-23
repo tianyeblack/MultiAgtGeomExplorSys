@@ -16,29 +16,23 @@ public class AgentsTrail {
 	// Dimensions of the space we are working
 	public int DIMX = 1000, DIMY = 1000, DIMZ =200;
 	//Affects the resolution and the FrameRate
-	public int GRIDX = 250, GRIDY = 250, GRIDZ = 40;
-	public VolumetricSpace volumeA;
-	public VolumetricSpace volumeB;
-	public VolumetricSpace volumeC;
+	public int GRIDX = 250, GRIDY = 250, GRIDZ = 50;
+	public int ratio = 4;
+	public VolumetricSpace volumeA, volumeB, volumeC, volumeS;
 	
 	//level where agents of type 1 are being created 
-<<<<<<< HEAD
-	static int creationLevel = 0;
-=======
-	public int creationLevel = 10;
->>>>>>> FETCH_HEAD
+	public int creationLevel = Integer.MAX_VALUE;
 	ArrayList<Agent> agents;
 	ArrayList<AgentLine> connections;
-	public Vec3D[] geo_starts;
-	public Vec3D[] outlines;
-	public Vec3D[] twod_plane;
-	public float[] geo_scores;
-	public float[] out_scores;
-	public float[] twod_scores;
+	public Vec3D[] geo_starts, outlines, twod_plane; 
+	public ArrayList<Vec3D> loads, supports;
+	public float[] geo_scores, out_scores, twod_scores;
 
 	protected AgentsTrail() {
 		agents = new ArrayList<Agent>();
 		connections = new ArrayList<AgentLine>();
+		loads = new ArrayList<Vec3D>();
+		supports = new ArrayList<Vec3D>();
 	}
 	
 	public static AgentsTrail getInstance() {
@@ -86,7 +80,7 @@ public class AgentsTrail {
 	public void addAgents(int pop, float[] scores, Vec3D[] starts) {
 		int size = agents.size();
 		for (int i = 0; i < pop; i++) {
-			agents.add(new Agent(i + size, starts[i], scores[i], "", agents, pop + size));
+			agents.add(new Agent(i + size, starts[i], scores[i], "", pop + size));
 		}
 	}
 
@@ -102,6 +96,8 @@ public class AgentsTrail {
 					else a.setType("c");
 				}
 			}
+		} else {
+			for (Agent a : agents) a.setType("");
 		}
 	}
 	
