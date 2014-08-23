@@ -41,7 +41,9 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	int movieCounter ;
 	boolean videoRecord = false;
 	int counter = 0;
+	int pop=100;
 	boolean runToggle = false;
+
 	boolean capture = false;
 	boolean record = false;
 	boolean strok = false;
@@ -56,14 +58,15 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 
 	int ratio = 1;
 	float isoBrushSize = ratio;
-	float isoBrushDensity = 1f;
+	float isoBrushDensity = 2f;
 
 	AgentsTrail agt;
 
 	public void setup() {
 		size(1200, 800, OPENGL);
 		smooth();
-		cam = new PeasyCam(this, 600);
+		cam = new PeasyCam(this, 800);
+		//		cam.lookAt(800, -200, 800);
 		agt = AgentsTrail.getInstance();
 		getStructure("src/data/TOPY_MESH_POINTS_01.stl");
 		getStructurePt("src/data/TOPY_MESH_POINTS_01.txt");
@@ -75,15 +78,15 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		center = new Vec3D().sub(new Vec3D(center.x / 2, center.y / 2, center.z / 2));
 		meshS.translate(center);
 
-//		getGeometry("src/data/catenary_mesh_relaxed_03.txt");
-//		getBoundary("src/data/catenary_mesh_relaxed_04_outlines.txt");
-//		get2DPlane("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
+		//getGeometry("src/data/catenary_mesh_relaxed_03.txt");
+		getBoundary("src/data/TOPY_MESH_POINTS_01.txt");
 		agt.setDIMAndGRID(bX, bY, bZ, ratio);
-		voxelizer = new MeshVoxelizer(agt.GRIDX, agt.GRIDY, agt.GRIDZ);
-		agt.volumeS = voxelizer.voxelizeMesh(meshS);
-		
+		//getBoundary("src/data/catenary_mesh_relaxed_04_outlines.txt");
+   	  //  get2DPlane("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
+        //get2DPlane("src/data/catenary_mesh_relaxed_04_outlines.txt");
+
 		agt.assignAgentsType(1);
-		//		agt.assignAgentsType(2);
+		agt.assignAgentsType(2);
 		surfaceA = new ArrayIsoSurface(agt.volumeA);
 		surfaceB = new ArrayIsoSurface(agt.volumeB);
 		surfaceC = new ArrayIsoSurface(agt.volumeC);
@@ -110,7 +113,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		agt.runAgents(frameCount);
 		if (trail == true) {
 			displayTrails();
-//			displayConnections();
+			displayConnections();
 		} else {
 			displayLocs();
 		}
@@ -419,7 +422,6 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		}
 	}
 
-
 	void drawTrails() {
 		for (Agent a : agt.getAgents()) {
 			if (!a.getType().equals("")) {
@@ -481,7 +483,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			meshB.saveAsSTL(sketchPath(meshB.name + frameCount+ counter + ".stl"));
 			meshC.saveAsSTL(sketchPath(meshC.name + frameCount+ counter + ".stl"));
 			counter = counter + 1;
-			println ("Saved Successfull");
+			println ("Saved Successfull as"+meshA.name + frameCount+ counter + ".stl");
 		}
 		if (key=='e' || key== 'E') {
 			// saveFrame("/output/seq-####.jpg");
