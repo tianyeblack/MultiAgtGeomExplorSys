@@ -56,7 +56,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	//Affects the mesh
 	float ISO = 0.5f;
 
-	int ratio = 1;
+	int ratio = 20;
 	float isoBrushSize = ratio;
 	float isoBrushDensity = 2f;
 
@@ -68,18 +68,18 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 		cam = new PeasyCam(this, 800);
 		//		cam.lookAt(800, -200, 800);
 		agt = AgentsTrail.getInstance();
-		getStructure("src/data/TOPY_MESH_POINTS_01.stl");
-		getStructurePt("src/data/TOPY_MESH_POINTS_01.txt");
-		float[] fs = new float[agt.loads.size()];
-		Vec3D[] vs = new Vec3D[agt.loads.size()];
-		agt.addAgents(agt.loads.size(), fs, agt.loads.toArray(vs));
-		AABB bBox = meshS.getBoundingBox();
-		Vec3D center = bBox.getMax().add(bBox.getMin());
-		center = new Vec3D().sub(new Vec3D(center.x / 2, center.y / 2, center.z / 2));
-		meshS.translate(center);
+//		getStructure("src/data/TOPY_MESH_POINTS_01.stl");
+//		getStructurePt("src/data/TOPY_MESH_POINTS_01.txt");
+//		float[] fs = new float[agt.loads.size()];
+//		Vec3D[] vs = new Vec3D[agt.loads.size()];
+//		agt.addAgents(agt.loads.size(), fs, agt.loads.toArray(vs));
+//		AABB bBox = meshS.getBoundingBox();
+//		Vec3D center = bBox.getMax().add(bBox.getMin());
+//		center = new Vec3D().sub(new Vec3D(center.x / 2, center.y / 2, center.z / 2));
+//		meshS.translate(center);
 
-		//getGeometry("src/data/catenary_mesh_relaxed_03.txt");
-		getBoundary("src/data/TOPY_MESH_POINTS_01.txt");
+		getGeometry("src/data/catenary_mesh_relaxed_03.txt");
+//		getBoundary("src/data/TOPY_MESH_POINTS_01.txt");
 		agt.setDIMAndGRID(bX, bY, bZ, ratio);
 		//getBoundary("src/data/catenary_mesh_relaxed_04_outlines.txt");
    	  //  get2DPlane("src/data/catenary_mesh_relaxed_04_flatsrf.txt");
@@ -391,7 +391,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			stroke(255, 0, 0);	
 			gfx.mesh(meshC, true);
 			stroke(128, 128, 128);
-			gfx.mesh(meshS, true);
+//			gfx.mesh(meshS, true);
 		} else {
 			noStroke();
 			fill(0, 0, 200);			
@@ -446,17 +446,19 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 				}
 			}
 		}
-		for (int i = 0; i < agt.GRIDX; i++) {
-			for (int j = 0; j < agt.GRIDY; i++) {
-				for (int k = 0; k < agt.GRIDZ; k++) {
-					int indexA = agt.volumeA.getIndexFor(i, j, k);
-					int indexB = agt.volumeB.getIndexFor(i, j, k);
-					int indexC = agt.volumeC.getIndexFor(i, j, k);
-					if (0 != agt.volumeA.getVoxelAt(indexA) && 0 != agt.volumeB.getVoxelAt(indexB)) agt.volumeB.setVoxelAt(indexB, 0f);
-					if (0 != agt.volumeA.getVoxelAt(indexB) && 0 != agt.volumeB.getVoxelAt(indexC)) agt.volumeC.setVoxelAt(indexC, 0f);
-				}
-			}
-		}
+//		Remove overlapping meshes, BEGIN
+//		for (int i = 0; i < agt.GRIDX; i++) {
+//			for (int j = 0; j < agt.GRIDY; i++) {
+//				for (int k = 0; k < agt.GRIDZ; k++) {
+//					int indexA = agt.volumeA.getIndexFor(i, j, k);
+//					int indexB = agt.volumeB.getIndexFor(i, j, k);
+//					int indexC = agt.volumeC.getIndexFor(i, j, k);
+//					if (0 != agt.volumeA.getVoxelAt(indexA) && 0 != agt.volumeB.getVoxelAt(indexB)) agt.volumeB.setVoxelAt(indexB, 0f);
+//					if (0 != agt.volumeA.getVoxelAt(indexB) && 0 != agt.volumeB.getVoxelAt(indexC)) agt.volumeC.setVoxelAt(indexC, 0f);
+//				}
+//			}
+//		}
+//		Remove overlapping meshes, END
 		surfaceA.reset();
 		surfaceA.computeSurfaceMesh(meshA, ISO);
 		surfaceB.reset();

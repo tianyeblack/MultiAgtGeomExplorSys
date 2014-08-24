@@ -173,15 +173,17 @@ public class Agent {
 		if (runToggle == true) {
 			vel.addSelf(acc);
 			vel.limit(maxvel);
-			int[] temp1 = Utility.coorToIndex(loc, agt.DIMX, agt.DIMY, agt.DIMZ, agt.ratio);
 			loc.addSelf(vel);
-			int[] temp2 = Utility.coorToIndex(loc, agt.DIMX, agt.DIMY, agt.DIMZ, agt.ratio);
-			if (0f != agt.volumeS.getVoxelAt(agt.volumeS.getIndexFor(temp1[0], temp1[1], temp1[2])) &&
-					0f == agt.volumeS.getVoxelAt(agt.volumeS.getIndexFor(temp2[0], temp2[1], temp2[2]))) {
-				vel.invert();
-				loc.addSelf(vel);
-				loc.addSelf(vel);
-			}
+//			Avoid getting out of structure, BEGIN
+//			int[] temp1 = Utility.coorToIndex(loc, agt.DIMX, agt.DIMY, agt.DIMZ, agt.ratio);
+//			int[] temp2 = Utility.coorToIndex(loc, agt.DIMX, agt.DIMY, agt.DIMZ, agt.ratio);
+//			if (0f != agt.volumeS.getVoxelAt(agt.volumeS.getIndexFor(temp1[0], temp1[1], temp1[2])) &&
+//					0f == agt.volumeS.getVoxelAt(agt.volumeS.getIndexFor(temp2[0], temp2[1], temp2[2]))) {
+//				vel.invert();
+//				loc.addSelf(vel);
+//				loc.addSelf(vel);
+//			}
+//			Avoid getting out of structure, END
 			acc.clear();
 		}
 	}
