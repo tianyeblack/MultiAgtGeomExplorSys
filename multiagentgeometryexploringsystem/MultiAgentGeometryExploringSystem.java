@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import agentTrailGeomForm.Agent;
 import agentTrailGeomForm.AgentLine;
 import agentTrailGeomForm.AgentsTrail;
+import agentTrailGeomForm.Utility;
 import controlP5.ControlP5;
 import peasy.PeasyCam;
 import processing.core.PApplet;
@@ -56,7 +57,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	//Affects the mesh
 	float ISO = 0.5f;
 
-	int ratio = 20;
+	int ratio = 3;
 	float isoBrushSize = ratio;
 	float isoBrushDensity = 2f;
 
@@ -390,7 +391,7 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 			gfx.mesh(meshB, true);
 			stroke(255, 0, 0);	
 			gfx.mesh(meshC, true);
-			stroke(128, 128, 128);
+//			stroke(128, 128, 128);
 //			gfx.mesh(meshS, true);
 		} else {
 			noStroke();
@@ -423,29 +424,69 @@ public class MultiAgentGeometryExploringSystem extends PApplet {
 	}
 
 	void drawTrails() {
-		for (Agent a : agt.getAgents()) {
-			if (!a.getType().equals("")) {
-				VolumetricBrush brush;
-				if(a.getType().equals("a")){
-					brush = brushA;
-					stroke(0, 255, 0);
-					strokeWeight(2.0f);
-				} else if(a.getType().equals("b")){
-					brush = brushB;
-					stroke(255, 255, 0);
-					strokeWeight(1.0f);
-				} else if(a.getType().equals("c")) {
-					brush = brushC;
-					stroke(0, 0, 255);
-					strokeWeight(1.0f);
-				} else brush = brushA;
-
+//		Draw uniform meshes, BEGIN
+//		for (Agent a : agt.getAgents()) {
+//			if (!a.getType().equals("")) {
+//				VolumetricBrush brush;
+//				if(a.getType().equals("a")){
+//					brush = brushA;
+//					stroke(0, 255, 0);
+//					strokeWeight(2.0f);
+//				} else if(a.getType().equals("b")){
+//					brush = brushB;
+//					stroke(255, 255, 0);
+//					strokeWeight(1.0f);
+//				} else if(a.getType().equals("c")) {
+//					brush = brushC;
+//					stroke(0, 0, 255);
+//					strokeWeight(1.0f);
+//				} else brush = brushA;
+//
+//				for (Vec3D v : a.getTrail()) {
+//					point(v.x, v.y, v.z);
+//					brush.drawAtAbsolutePos(v, isoBrushDensity);
+//				}
+//			}
+//		}
+//		Draw uniform meshes, END
+//		Draw separate meshes, BEGIN
+		ArrayList<Agent> agents = agt.getAgents();
+		for (Agent a : agents) {
+			if (a.getType().equals("a")) {
+				stroke(0, 255, 0);
+				strokeWeight(2.0f);
 				for (Vec3D v : a.getTrail()) {
 					point(v.x, v.y, v.z);
-					brush.drawAtAbsolutePos(v, isoBrushDensity);
+					brushA.drawAtAbsolutePos(v, isoBrushDensity);
 				}
 			}
 		}
+		for (Agent a : agents) {
+			if (a.getType().equals("b")) {
+				stroke(255, 255, 0);
+				strokeWeight(1.0f);
+				for (Vec3D v : a.getTrail()) {
+					point(v.x, v.y, v.z);
+					int[] indices = Utility.coorToIndex(v, agt.DIMX, agt.DIMY, agt.DIMZ, ratio);
+					int indexA = agt.volumeA.getIndexFor(indices[0], indices[1], indices[2]);
+					if (0 == agt.volumeA.getVoxelAt(indexA)) brushB.drawAtAbsolutePos(v, isoBrushDensity);
+				}
+			}
+		}
+		for (Agent a : agents) {
+			if (a.getType().equals("c")) {
+				stroke(255, 255, 0);
+				strokeWeight(1.0f);
+				for (Vec3D v : a.getTrail()) {
+					point(v.x, v.y, v.z);
+					int[] indices = Utility.coorToIndex(v, agt.DIMX, agt.DIMY, agt.DIMZ, ratio);
+					int indexA = agt.volumeA.getIndexFor(indices[0], indices[1], indices[2]);
+					int indexB = agt.volumeB.getIndexFor(indices[0], indices[1], indices[2]);
+					if (0 == agt.volumeA.getVoxelAt(indexA) && 0 == agt.volumeB.getVoxelAt(indexB)) brushC.drawAtAbsolutePos(v, isoBrushDensity);
+				}
+			}
+		}
+//		Draw separate meshes, END
 //		Remove overlapping meshes, BEGIN
 //		for (int i = 0; i < agt.GRIDX; i++) {
 //			for (int j = 0; j < agt.GRIDY; i++) {
