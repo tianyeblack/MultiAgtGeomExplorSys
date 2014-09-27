@@ -1,11 +1,14 @@
 package agentTrailGeomForm;
 
-
 import toxi.geom.Vec3D;
 
+// a line connecting two agents' two trail points
 public class AgentLine {
+	// the two agents
 	Agent a, b;
+	// their two trail points
 	Vec3D pta, ptb;
+	// the indices of the two points in their trail
 	int indexa, indexb;
 	
 	AgentLine(Agent _a, Agent _b, Vec3D _pta, Vec3D _ptb, int _indexa, int _indexb) {
@@ -24,6 +27,4 @@ public class AgentLine {
 	public Vec3D getPtb() {
 		return new Vec3D(ptb.x(), ptb.y(), ptb.z());
 	}
-	
-
 }

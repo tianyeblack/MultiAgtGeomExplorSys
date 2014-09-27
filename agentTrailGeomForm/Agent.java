@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import toxi.geom.Vec3D;
 
 public class Agent {
+	// arguments for flocking algorithm
 	static final float maxvel = 2;
 	static final float maxForce = 2;
 	static final int every = 5;
@@ -14,7 +15,7 @@ public class Agent {
 	static final float cohesion = 1f;
 	static final float separation = 1f;
 
-	static float faceAttraction = .3f;
+	static final float faceAttraction = .3f;
 	static final float onSrfMotion = .1f;
 	static final float trailFollow = 0.5f;
 
@@ -26,6 +27,7 @@ public class Agent {
 
 	static final float thresh = 50f;
 	static final float agentBoxSize = 10f;
+	// the bounding box's dimensions and agent system
 	static float a;
 	static float b;
 	static float c;
@@ -41,10 +43,8 @@ public class Agent {
 	boolean runAttraction;					// getting attracted by the input geometry
 	float score;							// property 1
 	String agentType;						// meaningful name for agents type
-	int counter=0;
 
-
-
+	// record the distance towards other agents current locations and their starting points to avoid repeated computation in one run (pass)
 	float[] dist_to_agent;
 	float[] dist_to_start;
 
@@ -53,6 +53,7 @@ public class Agent {
 		start = new Vec3D(_start.x(), _start.y(), _start.z());
 		loc = new Vec3D(_start.x(), _start.y(), _start.z());
 		acc = new Vec3D();
+		vel = new Vec3D(0, 0, (float) Math.random() * 2);
 		runToggle = false;
 		score = _score;
 		agentType = _agentType;
@@ -61,14 +62,17 @@ public class Agent {
 		dist_to_start = new float[_pop];
 	}
 
+	// return the whole trail
 	public ArrayList<Vec3D> getTrail() {
 		return trail;
 	}
 
+	// return a copy (new object) of current location 
 	public Vec3D getLoc() {
 		return loc.copy();
 	}
 
+	// set the type of the agent, which affect things like initial velocity
 	public void setType(String agtType) {
 		agentType = agtType;
 		if (agentType.equals("a")) {
@@ -77,17 +81,18 @@ public class Agent {
 			vel = new Vec3D((float)(8 * Math.random() - 4), (float)(8 * Math.random() - 4), 0);
 		} else if (agentType.equals("c")) {
 			vel = new Vec3D((float)(8 * Math.random() - 4), (float)(8 * Math.random() - 4), 0);
-		} else {
-			vel = new Vec3D(0, 0, (float) Math.random() * 2);
 		}
 	}
 
+	// return the type of the agent
 	public String getType() {
 		return agentType;
 	}
+	
+	// core function, determining the agent's behaviors
 	public void run(int iteration) {
 		if (runToggle == true) {
-			ArrayList<Agent> agents = agt.getAgents();
+			ArrayList<Agent> agents = agt.agents;
 			for (int i = 0; i < agents.size(); i++) {
 				Agent a = agents.get(i);
 				dist_to_start[i] = loc.distanceTo(a.start);
@@ -107,55 +112,43 @@ public class Agent {
 			}
 		}
 
-		//	if (agentType.equals("a") || agentType.equals("b")) {
-		//flock();
-		//	}
 		flock();
-
 
 		if (agentType.equals("a")) {
 			moveOnSrf(onSrfMotion);
 			//followTrails(trailFollow);
-		}
-
-		if (agentType.equals("b")) {
+		} else if (agentType.equals("b")) {
 			flock();
 			//attractFaces(faceAttraction/5);
 			//followTrails(trailFollow);
-		}
-
-		//				
-		if (agentType.equals("c")) {
+		} else if (agentType.equals("c")) {
 			moveOnSrf(onSrfMotion);
 			attractFaces(faceAttraction/10);
 		}
-		//				
-
-
+		
 		if (iteration<50 || iteration>200){
 			if (agentType.equals("b")) {
 				attractFaces(faceAttraction);
 			}
-			//					
-
 		}
 
 		if (iteration % every == 0 && iteration >0 ) {
 			dropTrail(every,trailNum,iteration);
-
 		}
 	}
 
+	// basic flocking algorithm for agents
 	private void flock() {
 		separation(separation);
 		cohesion(cohesion);
 		alignment(alignment);
 	}
 
+	// connect agents when they are in certain view range of each other
 	public void agentConnection(float view, ArrayList<AgentLine> connections, int iteration) {
 		if (iteration % every == 0 && runToggle == true) {
 			int count = 0;
-			ArrayList<Agent> agents = agt.getAgents();
+			ArrayList<Agent> agents = agt.agents;
 			for (int i = 0; i < agents.size() && count <= 3; i++) {
 				if (dist_to_agent[i] < view && dist_to_agent[i] > 1) {
 					count++;
@@ -169,6 +162,7 @@ public class Agent {
 		}
 	}
 
+	// every run the location will be changed based velocity, which is based on acceleration that will be cleared every single run
 	public void update() {
 		if (runToggle == true) {
 			vel.addSelf(acc);
@@ -188,15 +182,17 @@ public class Agent {
 		}
 	}
 
+	// add trail points
 	private void dropTrail(int every,int trailNum,int  iteration) {
 		trail.add(loc.copy());
 	}
 
+	// make the agent move towards the starting point (each agent has a starting point) with highest score
 	private void moveOnSrf(float magnitude) {
 		int highID = 0;
 		float thisScore = score;
 
-		ArrayList<Agent> agents = agt.getAgents();
+		ArrayList<Agent> agents = agt.agents;
 		for (int i = 0; i < agents.size(); i++) {
 			Agent a = agents.get(i);
 			if (dist_to_start[i] > 0 && dist_to_start[i] < fovScore) {
@@ -213,10 +209,11 @@ public class Agent {
 		acc.addSelf(steeringVector);
 	}
 
+	// make the agent follow the imported surface (represented by a set of points, each point applies some influence on the agent), how much the influence is is controlled by magnitude
 	private void attractFaces(float magnitude) {
 		Vec3D sum = new Vec3D();
 		int count = 0;
-		ArrayList<Agent> agents = agt.getAgents();
+		ArrayList<Agent> agents = agt.agents;
 		for (int i = 0; i < agents.size(); i++) {
 			Agent a = agents.get(i);
 			if (dist_to_start[i] > 0 && dist_to_start[i] < 200) {
@@ -236,11 +233,13 @@ public class Agent {
 		acc.addSelf(steering);
 	}
 
+	// make the agent move towards the closest trail point, how much the influence is is controlled by magnitude
+	@SuppressWarnings("unused")
 	private void followTrails(float magnitude) {
-		ArrayList<Agent> agents = agt.getAgents();
+		ArrayList<Agent> agents = agt.agents;
 		int cloAID = -1;
 		int cloTID = -1;
-		//
+		// scan through every agent's trail and find the closest trail point together with corresponding agent
 		float cloDist = 500;
 		Vec3D closestTrail = new Vec3D();
 		Vec3D closestTrailFWD = new Vec3D();
@@ -258,20 +257,23 @@ public class Agent {
 			}
 		}
 
+		// there are more than 3 trail points and closest trail point and corresponding agent are found
 		if (trail.size() > 3 && cloAID != -1 && cloTID != -1) {
 			Agent cloA = agents.get(cloAID);
 			closestTrail.addSelf(cloA.trail.get(cloTID));
 
+			// the trail point (closestTrailFWD) next to the point (closestTrail) we just find, if the point (closestTrail) we find is already the last trail then closestTrailFWD will be the same as closestTrail 
 			if (cloTID < cloA.trail.size() - 1) closestTrailFWD.set(cloA.trail.get(cloTID + 1));
 			else if (cloTID == cloA.trail.size() - 1) closestTrailFWD.set(cloA.trail.get(cloTID));
 
 			Vec3D mid = Utility.getNormalPoint(loc, closestTrail, closestTrailFWD);
 			float distance = loc.distanceTo(mid);
+			// if the distance is less than 2 times overkillDist
 			if (distance < overkillDist*2) {
 				seek(mid, magnitude);
 				Vec3D heading = closestTrailFWD.sub(closestTrail);
 				steering.addSelf(heading);
-
+				// if the distance is less than overkillDist then kill the agent
 				if (distance < overkillDist) runToggle = false;
 			}
 			steering.scaleSelf(magnitude);
@@ -279,55 +281,68 @@ public class Agent {
 		}
 	}
 
+	// align the agents, how much the influence is is controlled by magnitude
 	private void alignment(float magnitude) {
-		ArrayList<Agent> agents = agt.getAgents();
-		Vec3D steering = new Vec3D();
+		ArrayList<Agent> agents = agt.agents;
 		// We are creating a new empty vector to be added to the agent's acceleration.
 		// This will be translated into a change in direction based on the calculations.
+		Vec3D steering = new Vec3D();
+		// counter that is used to count the number of agents which fall into a agent's alignment range
 		int count = 0;
-		// we create a variable called count. It will tell us how many times we have run into certain kinds of agents.
-		for (int i = 0; i < agents.size(); i++) { // Loop through all agents
+		for (int i = 0; i < agents.size(); i++) {
 			Agent a = agents.get(i);
 			float distance = dist_to_agent[i]; // distance to other agents
 			if (distance > 0 && distance < fovAlign) { 
-				// if in range (0, fovAlign), add the other agent's velocity to this agent's steering
+				// if in range (0, fovAlign), add that agent's velocity to this agent's steering
 				steering.addSelf(a.vel);
 				count++;
 			}
 		}
-		if (count > 0) steering.scaleSelf(1.0f / count);
 		// scale the steering according the number of agents we run into
+		if (count > 0) steering.scaleSelf(1.0f / count);
+		// scale again according to magnitude, how much this will affect
 		steering.scaleSelf(magnitude);
-		// scale again according to magnitude
-		acc.addSelf(steering);
 		// steer our agent by changing the acceleration, this operation will make all the agents start to move toward the same direction over time
+		acc.addSelf(steering);
 	}
 
+	// bring the agents closer, how much the influence is is controlled by magnitude
 	private void cohesion(float magnitude) {
-		ArrayList<Agent> agents = agt.getAgents();
+		ArrayList<Agent> agents = agt.agents;
+		// We are creating a new empty vector to be added to the agent's acceleration.
+		// This will be translated into a change in direction based on the calculations.
 		Vec3D sum = new Vec3D();
+		// counter that is used to count the number of agents which fall into a agent's cohesion range
 		int count = 0;
 		for (int i = 0; i < agents.size(); i++) {
 			Agent a = agents.get(i);
-			float distance = dist_to_agent[i];
+			float distance = dist_to_agent[i];	// distance to other agents
 			if (distance > 0 && distance < fovCoh) {
+				// if in range (0, fovCoh), add that agent's velocity to this agent's sum
 				sum.addSelf(a.loc);
 				count++;
 			}
 		}
+		// scale the sum according the number of agents we run into
 		if (count > 0) sum.scaleSelf(1.0f / count);
 		sum.subSelf(loc);
+		// scale again according to magnitude, how much this will affect
 		sum.scaleSelf(magnitude);
+		// steer our agent by changing the acceleration, this operation will make all the agents start to move toward each other over time
 		acc.addSelf(sum);
 	}
 
+	// separate the agents, how much the influence is is controlled by magnitude
 	private void separation(float magnitude) {
-		ArrayList<Agent> agents = agt.getAgents();
+		ArrayList<Agent> agents = agt.agents;
+		// We are creating a new empty vector to be added to the agent's acceleration.
+		// This will be translated into a change in direction based on the calculations.
 		Vec3D steering = new Vec3D();
+		// counter that is used to count the number of agents which fall into a agent's cohesion range
 		int count = 0;
 		for (int i = 0; i < agents.size(); i++) {
 			Agent a = agents.get(i);
-			float distance = dist_to_agent[i];
+			float distance = dist_to_agent[i];	// distance to other agents
 			if (distance > 0 && distance < fovSep) {
 				Vec3D diff = loc.sub(a.loc);
 				diff.normalizeTo(1.0f / distance);
@@ -335,11 +350,16 @@ public class Agent {
 				count++;
 			}
 		}
+		// scale the sum according the number of agents we run into
 		if (count > 0) steering.scaleSelf(1.0f / count);
+		// scale again according to magnitude, how much this will affect
 		steering.scaleSelf(magnitude);
+		// steer our agent by changing the acceleration, this operation will make all the agents start to move toward each other over time
 		acc.addSelf(steering);
 	}
 
+	@SuppressWarnings("unused")
+	// the paraboloid function applies influence on the agent, how much the influence is is controlled by magnitude
 	private void followParaboloid(float magnitude) {
 		float new_x, new_y;
 		if (loc.x < 0) new_x = loc.x + magnitude;
@@ -352,11 +372,14 @@ public class Agent {
 		acc.addSelf(towards.subSelf(loc));
 	}
 
+	// make the agent moving towards a set of targets (collectively affect the direction), how much the influence is is controlled by magnitude
 	private void heading(ArrayList<Vec3D> targets, float magnitude) {
 		Vec3D steering = new Vec3D();
 		int count = 0;
+		// calculate the distances to each of the target
 		float[] dist_to_target = new float[targets.size()];
 		for (int i = 0; i < targets.size(); i++) dist_to_target[i] = loc.distanceTo(targets.get(i));
+		// apply the influence of targets whose distances are under 100 and over 0
 		for (int i = 0; i < targets.size(); i++) {
 			if (dist_to_target[i] > 0 && dist_to_target[i] < 100) {
 				Vec3D temp = targets.get(i).sub(loc);
@@ -373,18 +396,22 @@ public class Agent {
 		acc.addSelf(steering);
 	}
 
-	private void seek(Vec3D target, float factor) {
-		acc.addSelf(steer(target, false).scaleSelf(factor));
+	// seek for a specific target and make the agent move towards that, how much the influence is is controlled by magnitude
+	private void seek(Vec3D target, float magnitude) {
+		acc.addSelf(steer(target, false).scaleSelf(magnitude));
 	}
 
+	// steer towards a certain target with a slowdown or not
 	private Vec3D steer(Vec3D target, boolean slowdown) {
 		Vec3D steering = new Vec3D();
 		Vec3D desired = target.sub(loc);
 		float d = desired.magnitude();
 		if (d > 0) {
 			desired.normalize();
+			// if the distance is within 100 and the agent needs to slow down, scale the vector to maxvel * (d / 100), if not then scale to maxvel
 			if (slowdown == true && d < 100) desired.scaleSelf(maxvel * (d / 100));
 			else desired.scaleSelf(maxvel);
+			// apply a force to the steering vector
 			steering.set(desired.sub(vel).limit(maxForce));
 		}
 		return steering;

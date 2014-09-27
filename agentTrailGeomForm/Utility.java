@@ -2,12 +2,15 @@ package agentTrailGeomForm;
 
 import toxi.geom.Vec3D;
 
+// static functions used by others
 public class Utility {
+	// calculate the corresponding value for certain 
 	public static float paraboloid(float x, float y, float a, float b, float c) {
 		float z = c * (y * y / (b * b) - x * x / (a * a));
 		return z;
 	}
 	
+	// get the normal point
 	public static Vec3D getNormalPoint(Vec3D p, Vec3D a, Vec3D b) {
 		Vec3D ap = p.sub(a);
 		Vec3D ab = b.sub(a);
@@ -16,6 +19,7 @@ public class Utility {
 		return a.add(ab);
 	}
 	
+	// converting coordinates to index
 	public static int[] coorToIndex(Vec3D pos, int DIMX, int DIMY, int DIMZ, int ratio) {
 		int[] result = new int[3];
 		Vec3D rel = pos.add(new Vec3D(DIMX / 2, DIMY / 2, DIMZ / 2));
